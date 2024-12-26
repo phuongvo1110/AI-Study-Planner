@@ -36,7 +36,17 @@ export class WorkspaceComponent implements OnInit {
     dayMaxEvents: true,
     eventClick: this.handleEventClick.bind(this),
     eventsSet: this.handleEvents.bind(this),
-    eventChange: this.handleEventChange.bind(this)
+    eventChange: this.handleEventChange.bind(this),
+    eventClassNames: ({ event }) => {
+      const status = event.extendedProps['status'];
+      switch (status) {
+        case 1: return ['status-event status-not-started'];
+        case 2: return ['status-event status-in-progress'];
+        case 3: return ['status-event status-completed'];
+        case 4: return ['status-event status-expired'];
+        default: return [];
+      }
+    },
     /* you can update a remote database when these fire:
   eventAdd:
   eventChange:
@@ -67,6 +77,9 @@ export class WorkspaceComponent implements OnInit {
           start: task.start_date, 
           end: task.end_date, 
           allDay: false, 
+          extendedProps: {
+            status: task.status
+          }
         }));
 
         // Update the calendar with events

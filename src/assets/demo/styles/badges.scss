@@ -80,6 +80,27 @@
         color: #694382;
     }
 }
+.status-event {
+    &.status-completed {
+        background: #256029;
+        color: #FFF;
+    }
+
+    &.status-expired {
+        background: #C63737;
+        color: #FFF;
+    }
+
+    &.status-not-started {
+        background: #23547B;
+        color: #FFF;
+    }
+
+    &.status-in-progress {
+        background: #694382;
+        color: #FFF;
+    }
+}
 .priority-badge {
     &.priority-low {
         background: #C8E6C9;

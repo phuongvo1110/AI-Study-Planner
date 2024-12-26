@@ -5,7 +5,7 @@
             <div class="flex flex-col flex-wrap justify-content-center">
                 <div class="w-full flex gap-3 mb-3">
                     <p-button (onClick)="openNew()" styleClass="w-[150px]" label="Add new" icon="pi pi-plus"></p-button>
-                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Analyze with AI" icon="pi pi-desktop"></button>
+                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Analyze with AI" icon="pi pi-desktop" (click)="analyzeSchedule()"></button>
                     <p-dropdown styleClass="w-[200px]" [(ngModel)]="statusInput" inputId="taskStatus" optionValue="label" [options]="tasksStatus" placeholder="All Status">
                         <ng-template pTemplate="selectedItem">
                             <span *ngIf="statusInput" [class]="'task-badge status-' + statusInput.toString().trim().toLowerCase()">{{statusInput}}</span>
@@ -26,6 +26,7 @@
                     <button label="Search" pButton pRipple type="button" icon="pi pi-search" class="p-button-outlined" (click)="filterTasks()"></button>
                 </div>
             </div>
+            <span class="mb-3 mt-3 font-bold" *ngIf="analyzeMessage !== ''" [innerHTML]="analyzeMessage"></span>
             <p-table #dt1 [value]="filteredTasks" [rows]="10" [paginator]="true" [responsiveLayout]="'scroll'" [sortMode]="'multiple'" [globalFilterFields]="['name', 'description', 'priority.value', 'status.value', 'start_date', 'end_date']">
                 <ng-template pTemplate="caption">
 					<div class="flex justify-content-between flex-column sm:flex-row">
@@ -41,8 +42,8 @@
                     <tr>
                         <th pSortableColumn="name">Task Name <p-sortIcon field="name"></p-sortIcon></th>
                         <th>Description</th>
-                        <th pSortableColumn="priority.value">Priority <p-sortIcon field="priority"></p-sortIcon></th>
-                        <th pSortableColumn="status.value">Status <p-sortIcon field="status"></p-sortIcon></th>
+                        <th pSortableColumn="priority">Priority <p-sortIcon field="priority"></p-sortIcon></th>
+                        <th pSortableColumn="status">Status <p-sortIcon field="status"></p-sortIcon></th>
                         <th pSortableColumn="start_date">Start Date <p-sortIcon field="start_date"></p-sortIcon></th>
                         <th pSortableColumn="end_date">End Date <p-sortIcon field="end_date"></p-sortIcon></th>
                         <th></th>

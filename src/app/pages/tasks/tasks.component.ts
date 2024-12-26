@@ -20,7 +20,7 @@ export class TasksComponent implements OnInit {
   priorityInput: TaskPriority;
   taskForm: Task = {};
   submitted: boolean = false;
-
+  analyzeMessage!: string;
   tasksStatus: TaskStatus[] = [
     { label: 'NotStarted', value: 'notstarted' },
     { label: 'InProgress', value: 'inprogress' },
@@ -71,7 +71,13 @@ export class TasksComponent implements OnInit {
     this.submitted = false;
     this.taskDialog = true;
   }
-
+  analyzeSchedule() {
+    this.taskService.analyzeAI(this.tasks).subscribe({
+      next: (response: any) => {
+        this.analyzeMessage = response.data.message;
+      }
+    })
+  }
   // Edit an existing task
   editTask(task: Task) {
     this.taskForm = { ...task };
