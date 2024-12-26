@@ -1,0 +1,24 @@
+
+
+/* PrimeNG và các custom styles */
+$gutter: 1rem; // for primeflex grid system
+@import "../node_modules/primeng/resources/primeng.min.css";
+@import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeicons/primeicons.css";
+
+@import "assets/layout/styles/layout/layout.scss"; // custom layout
+@import "assets/demo/styles/flags/flags.css";
+@import "assets/demo/styles/badges.scss";
+@import "assets/demo/styles/code.scss";
+/* Tailwind CSS Layers */
+@layer tailwind-base, primeng, tailwind-utilities;
+@layer primeng;
+
+@layer tailwind-base {
+    @tailwind base;
+}
+
+@layer tailwind-utilities {
+    @tailwind components;
+    @tailwind utilities;
+}
