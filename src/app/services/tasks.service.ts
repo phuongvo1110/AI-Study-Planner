@@ -89,7 +89,7 @@ export class TaskService {
         end_date: task.end_date,
       })
     );
-    taskStrings.unshift('Provide feedback on potential adjustments: Warning about overly tight schedules that may lead to burnout. Recommending prioritization changes for improved focus and balance. For each line of feedback put them in a seperated list and a heading title <h1 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500"></h1> and HTML for example in <ol class="font-bold text-lg"></ol> and <li></li>. Give no JSON value inside.');
+    taskStrings.unshift('Provide feedback on potential adjustments: Warning about overly tight schedules that may lead to burnout. Recommending prioritization changes for improved focus and balance. (For each line of feedback put them in a seperated list and a heading title <h1 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500"></h1> and HTML for example in <ol class="font-bold text-lg"></ol> and <li></li>. Give no JSON value inside.)');
     const requestData = {
       date: moment().format("DD-MM-YYYY"),
       tasks: taskStrings,

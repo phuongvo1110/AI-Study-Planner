@@ -22,6 +22,14 @@ export class WorkspaceComponent implements OnInit {
   tasks: Task[] = [];
   workspaceDialog: boolean = false;
   selectTask: Task = {};
+  timerRunning: boolean = false;
+  startTimerCheck: boolean = false;
+  startTimer: boolean = false;
+  timerDuration: number = 25 * 60; 
+  breakDuration: number = 5 * 60; 
+  remainingTime: number = this.timerDuration;
+  interval: any = null;
+  timerPaused: boolean = false;
   calendarOptions = signal<CalendarOptions>({
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     headerToolbar: {
@@ -96,6 +104,11 @@ export class WorkspaceComponent implements OnInit {
   handleEventClick(clickInfo: EventClickArg) {
     this.selectTask = this.tasks.find(t => t.id === clickInfo.event.id);
     this.workspaceDialog = true;
+    if (this.mapStatus(this.selectTask.status) === 'InProgress') {
+      this.startTimerCheck = true;
+    } else {
+      this.startTimerCheck = false;
+    }
   }
 
   handleEvents(events: EventApi[]) {
@@ -157,5 +170,64 @@ export class WorkspaceComponent implements OnInit {
         default:
           throw new Error('Invalid Task Priority');
       }
+    }
+    startFocusTimer() {
+      this.timerRunning = true;
+      this.remainingTime = this.timerDuration;
+      this.startTimer = true;
+      this.interval = setInterval(() => {
+        this.remainingTime--;
+  
+        if (this.remainingTime <= 0) {
+          this.endFocusTimer();
+          alert("Focus session complete!");
+        }
+  
+        const taskDeadline = moment(this.selectTask.end_date);
+        if (taskDeadline.isBefore(moment())) {
+          this.endFocusTimer();
+          alert("Task deadline reached. Timer stopped.");
+        }
+      }, 1000);
+    }
+  
+    endFocusTimer() {
+      clearInterval(this.interval);
+      this.timerRunning = false;
+      this.remainingTime = this.timerDuration;
+      this.startTimer = false;
+    }
+    pauseFocusTimer() {
+      if (this.timerRunning) {
+        clearInterval(this.interval);
+        this.timerPaused = true;
+        this.timerRunning = false;
+      }
+    }
+    resumeFocusTimer() {
+      if (this.timerPaused) {
+        this.timerRunning = true;
+        this.timerPaused = false;
+    
+        this.interval = setInterval(() => {
+          this.remainingTime--;
+    
+          if (this.remainingTime <= 0) {
+            this.endFocusTimer();
+            alert("Focus session complete!");
+          }
+    
+          const taskDeadline = moment(this.selectTask.end_date);
+          if (taskDeadline.isBefore(moment())) {
+            this.endFocusTimer();
+            alert("Task deadline reached. Timer stopped.");
+          }
+        }, 1000);
+      }
+    }
+    formatTime(seconds: number): string {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 }
