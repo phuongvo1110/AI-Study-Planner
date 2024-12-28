@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class='demo-app'>
     <div class='demo-app-main'>
         <full-calendar *ngIf='calendarVisible()' [options]='calendarOptions()'>
@@ -21,9 +22,16 @@
                     <span
                         [class]="'priority-badge priority-' + mapPriority(selectTask.priority).toLowerCase()">{{mapPriority(selectTask.priority)}}</span>
                 </div>
+                <div class="action mt-3">
+                    <p-button label="Mark as completed" icon="pi pi-check" (onClick)="handleMarkCompleted()"></p-button>
+                </div>
                 <hr class="w-48 h-1 mx-auto my-4 bg-gray-300 border-0 rounded md:my-10 dark:bg-gray-700">
                 <div class="focus-timer flex flex-col items-center">
-                    <p class="text-2xl font-bold">{{ formatTime(remainingTime) }}</p>
+                    @if (!timerPaused) {
+                    <p class="text-9xl font-bold">{{ formatTime(remainingTime) }}</p>
+                    } @else {
+                    <p class="text-9xl font-bold">{{ formatTime(breakRemainingTime) }}</p>
+                    }
                     <div class="flex gap-3 justify-center items-center">
                         @if (!startTimer) {
                         <p-button [disabled]="!startTimerCheck" styleClass="w-[150px]" (click)="startFocusTimer()"
@@ -33,8 +41,8 @@
                             severity="warning">
                         </p-button>
                         } @else if (startTimer && timerPaused) {
-                        <p-button styleClass="w-[150px]" (click)="resumeFocusTimer()"
-                            label="Resume Timer" severity="info"></p-button>
+                        <p-button styleClass="w-[150px]" (click)="resumeFocusTimer()" label="Resume Timer"
+                            severity="info"></p-button>
                         }
                         <p-button [disabled]="!startTimer" styleClass="w-[150px]" (click)="endFocusTimer()"
                             label="End Timer" severity="danger"></p-button>

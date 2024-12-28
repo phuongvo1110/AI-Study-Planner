@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { WorkspaceComponent } from "./workspace/workspace.component";
 import { TasksComponent } from "./tasks/tasks.component";
+import { AnalyticsComponent } from "./analytics/analytics.component";
 
 @NgModule({
     imports: [
@@ -13,6 +14,10 @@ import { TasksComponent } from "./tasks/tasks.component";
             {
                 path: 'tasks',
                 component: TasksComponent
+            },
+            {
+                path: 'analytics',
+                component: AnalyticsComponent
             }
         ])
     ],

@@ -14,6 +14,7 @@ import { DialogModule } from "primeng/dialog";
 import { InputTextareaModule } from "primeng/inputtextarea";
 import { CalendarModule } from "primeng/calendar";
 import { ToastModule } from "primeng/toast";
+import { AnalyticsComponent } from "./analytics/analytics.component";
 
 @NgModule({
     imports: [
@@ -31,6 +32,6 @@ import { ToastModule } from "primeng/toast";
         CalendarModule,
         ToastModule
     ],
-    declarations: [WorkspaceComponent, TasksComponent],
+    declarations: [WorkspaceComponent, TasksComponent, AnalyticsComponent],
 })
 export class PagesModule {}

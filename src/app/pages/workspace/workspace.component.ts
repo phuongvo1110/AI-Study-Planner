@@ -7,14 +7,16 @@ import listPlugin from '@fullcalendar/list';
 import { TaskService } from "src/app/services/tasks.service";
 import { Task } from "src/app/models/task";
 import * as moment from "moment";
+import { MessageService } from "primeng/api";
 
 @Component({
   selector: "app-workspace",
   templateUrl: "./workspace.component.html",
   styleUrl: "./workspace.component.scss",
+  providers: [MessageService]
 })
 export class WorkspaceComponent implements OnInit {
-  constructor(private changeDetector: ChangeDetectorRef, private taskService: TaskService) {}
+  constructor(private changeDetector: ChangeDetectorRef, private taskService: TaskService, private messageService: MessageService) {}
   ngOnInit(): void {
     this.loadTasks();
   }
@@ -28,7 +30,9 @@ export class WorkspaceComponent implements OnInit {
   timerDuration: number = 25 * 60; 
   breakDuration: number = 5 * 60; 
   remainingTime: number = this.timerDuration;
+  breakRemainingTime: number = this.breakDuration;
   interval: any = null;
+  breakInterval: any = null;
   timerPaused: boolean = false;
   calendarOptions = signal<CalendarOptions>({
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
@@ -138,10 +142,30 @@ export class WorkspaceComponent implements OnInit {
       },
     })
   }
+  handleMarkCompleted() {
+    console.log(this.selectTask);
+    const updateTask: Task = {
+      name: this.selectTask.name,
+      start_date: this.selectTask.start_date,
+      end_date: this.selectTask.end_date,
+      description: this.selectTask.description,
+      priority: this.selectTask.priority,
+      //@ts-ignore
+      status: 3,
+    }
+    const taskForm = {...updateTask, estimated_date: this.calculateEstimatedTime(this.selectTask.start_date, this.selectTask.end_date)}
+    this.taskService.updateTask(this.selectTask.id, taskForm).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Task Update', detail: 'Mark Task Completed Successfully', life: 3000 });
+        this.loadTasks();
+        this.workspaceDialog = false;
+      }
+    })
+  }
   private calculateEstimatedTime(start_date: string | Date, end_date: string | Date): number {
       const start = moment(start_date);
       const end = moment(end_date);
-      return end.diff(start, 'minutes'); // Return difference in minutes
+      return end.diff(start, 'minutes');
     }
     mapStatus(status: any): string {
       switch (status) {
@@ -157,8 +181,6 @@ export class WorkspaceComponent implements OnInit {
           throw new Error('Invalid Task Status');
       }
     }
-  
-    // Helper method to map TaskPriority to API enums
     mapPriority(priority: any): string {
       switch (priority) {
         case 1:
@@ -179,14 +201,16 @@ export class WorkspaceComponent implements OnInit {
         this.remainingTime--;
   
         if (this.remainingTime <= 0) {
+          // API Update Completed Task
+          this.handleMarkCompleted();
           this.endFocusTimer();
-          alert("Focus session complete!");
+          this.messageService.add({ severity: 'success', summary: 'Timer Completed', detail: 'Focus session complete!', life: 3000 });
         }
   
         const taskDeadline = moment(this.selectTask.end_date);
         if (taskDeadline.isBefore(moment())) {
           this.endFocusTimer();
-          alert("Task deadline reached. Timer stopped.");
+          this.messageService.add({ severity: 'warn', summary: 'Timer Break', detail: 'Task deadline reached. Timer stopped.', life: 3000 });
         }
       }, 1000);
     }
@@ -202,10 +226,19 @@ export class WorkspaceComponent implements OnInit {
         clearInterval(this.interval);
         this.timerPaused = true;
         this.timerRunning = false;
+        this.breakInterval = setInterval(() => {
+          this.breakRemainingTime--;
+          if (this.breakRemainingTime <= 0) {
+            this.resumeFocusTimer();
+            this.messageService.add({ severity: 'warn', summary: 'Timer Break', detail: 'Break Time reached. Timer continue.', life: 3000 });
+          }
+        }, 1000)
       }
     }
     resumeFocusTimer() {
       if (this.timerPaused) {
+        clearInterval(this.breakInterval);
+        this.breakRemainingTime = this.breakDuration;
         this.timerRunning = true;
         this.timerPaused = false;
     
@@ -213,14 +246,16 @@ export class WorkspaceComponent implements OnInit {
           this.remainingTime--;
     
           if (this.remainingTime <= 0) {
+            // API Update Completed Task
+            this.handleMarkCompleted();
             this.endFocusTimer();
-            alert("Focus session complete!");
+            this.messageService.add({ severity: 'success', summary: 'Timer Completed', detail: 'Focus session complete!', life: 3000 });
           }
     
           const taskDeadline = moment(this.selectTask.end_date);
           if (taskDeadline.isBefore(moment())) {
             this.endFocusTimer();
-            alert("Task deadline reached. Timer stopped.");
+            this.messageService.add({ severity: 'warn', summary: 'Timer Break', detail: 'Task deadline reached. Timer stopped.', life: 3000 });
           }
         }, 1000);
       }
