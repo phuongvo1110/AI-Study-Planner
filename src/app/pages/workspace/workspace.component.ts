@@ -202,7 +202,6 @@ export class WorkspaceComponent implements OnInit {
   
         if (this.remainingTime <= 0) {
           // API Update Completed Task
-          this.handleMarkCompleted();
           this.endFocusTimer();
           this.messageService.add({ severity: 'success', summary: 'Timer Completed', detail: 'Focus session complete!', life: 3000 });
         }
@@ -217,9 +216,11 @@ export class WorkspaceComponent implements OnInit {
   
     endFocusTimer() {
       clearInterval(this.interval);
+      clearInterval(this.breakInterval);
       this.timerRunning = false;
       this.remainingTime = this.timerDuration;
       this.startTimer = false;
+      this.timerPaused = false;
     }
     pauseFocusTimer() {
       if (this.timerRunning) {
@@ -247,7 +248,6 @@ export class WorkspaceComponent implements OnInit {
     
           if (this.remainingTime <= 0) {
             // API Update Completed Task
-            this.handleMarkCompleted();
             this.endFocusTimer();
             this.messageService.add({ severity: 'success', summary: 'Timer Completed', detail: 'Focus session complete!', life: 3000 });
           }

@@ -27,7 +27,7 @@
                 </div>
             </div>
             <span class="mb-3 mt-3 font-bold" *ngIf="analyzeMessage !== ''" [innerHTML]="analyzeMessage"></span>
-            <p-table #dt1 [value]="filteredTasks" [rows]="10" [paginator]="true" [responsiveLayout]="'scroll'" [sortMode]="'multiple'" [globalFilterFields]="['name', 'description', 'priority.value', 'status.value', 'start_date', 'end_date']">
+            <p-table #dt1 [value]="filteredTasks" [rows]="rowsPerPage" [responsiveLayout]="'scroll'" [sortMode]="'multiple'" [globalFilterFields]="['name', 'description', 'priority.value', 'status.value', 'start_date', 'end_date']">
                 <ng-template pTemplate="caption">
 					<div class="flex justify-content-between flex-column sm:flex-row">
 						<button pButton label="Clear" class="p-button-outlined mb-2" icon="pi pi-filter-slash" (click)="dt1.clear()"></button>
@@ -73,6 +73,9 @@
                     <tr>
                         <td colspan="6">No tasks available.</td>
                     </tr>
+                </ng-template>
+                <ng-template pTemplate="summary">
+                    <p-paginator appendTo="body" (onPageChange)="onPageChange($event)" [first]="currentPage" [totalRecords]="totalRecords" [rows]="rowsPerPage"></p-paginator>
                 </ng-template>
             </p-table>
             

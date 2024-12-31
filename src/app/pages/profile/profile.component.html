@@ -1,0 +1,93 @@
+<p-toast></p-toast>
+<div class="grid p-fluid">
+    <div class="col-12 md:col-6">
+        <div class="card">
+            <h3>Profile</h3>
+            <div class="text-center mb-5">
+                <img [src]="this.user.avatar !== '' ? this.user.avatar : 'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg'" alt="Image" height="100" class="rounded-full">
+            </div>
+            <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()">
+                <div class="grid formgrid">
+                    <div class="col-6">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="idUser">Id</label>
+                            <input type="text" pInputText id="idUser" name="idUser" formControlName="id" readonly>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="name">Username</label>
+                            <span class="p-input-icon-left w-full">
+                                <i class="pi pi-user"></i>
+                                <input type="text" class="w-full" pInputText id="username" name="username"
+                                    formControlName="username" required>
+                            </span>
+                            <div *ngIf="submitted && f.username.errors" class="invalid-feedback text-red-500">
+                                <div *ngIf="f.username.errors.required">Username is required</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="email">Email</label>
+                            <input type="email" pInputText id="email" name="email" formControlName="email" required>
+                            <div *ngIf="submitted && f.email.errors" class="invalid-feedback text-red-500">
+                                <div *ngIf="f.email.errors.required">Email is required</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="createdAt">Created At</label>
+                            <input type="text" pInputText id="createAt" name="createAt" formControlName="created_at"
+                                readonly>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="createdAt">Avatar</label>
+                            <input type="text" pInputText id="avatar" name="avatar" formControlName="avatar">
+                        </div>
+                    </div>
+                </div>
+                <div class="action">
+                    <p-button type="submit" label="Update Profile"></p-button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-12 md:col-6">
+        <div class="card">
+            <h3>Update Password</h3>
+            <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+                <div class="grid formgrid">
+                    <div class="col-12">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="oldPassword">Old Password</label>
+                            <p-password id="password1" formControlName="oldPassword" placeholder="Password"
+                                [toggleMask]="true"
+                                inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+                        </div>
+                        <div *ngIf="passwordSubmitted && p.oldPassword.errors" class="invalid-feedback text-red-500">
+                            <div *ngIf="p.oldPassword.errors.required">Old Password is required</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="field flex flex-col">
+                            <label class="font-semibold" for="newPassword">New Password</label>
+                            <p-password id="confirm_password" formControlName="newPassword"
+                                placeholder="Confirm Password" [toggleMask]="true"
+                                inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+                            <div *ngIf="passwordSubmitted && p.newPassword.errors" class="invalid-feedback text-red-500">
+                                <div *ngIf="p.newPassword.errors.required">New Password is required</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="action">
+                    <p-button type="submit" label="Change Password"></p-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

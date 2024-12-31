@@ -13,7 +13,7 @@
                             <label for="username" class="block text-900 text-xl font-medium mb-2">Username</label>
                             <input formControlName="username" id="username" type="text" placeholder="Username" pInputText
                                 class="w-full md:w-30rem mb-5" style="padding:1rem">
-                            <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                            <div *ngIf="submitted && f.username.errors" class="invalid-feedback text-red-500">
                                 <div *ngIf="f.username.errors.required">Username is required</div>
                             </div>
                         </div>
@@ -21,7 +21,7 @@
                             <label for="email" class="block text-900 text-xl font-medium mb-2">Email</label>
                             <input formControlName="email" id="email" type="email" placeholder="Email address" pInputText
                                 class="w-full md:w-30rem mb-5" style="padding:1rem">
-                            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                            <div *ngIf="submitted && f.email.errors" class="invalid-feedback text-red-500">
                                 <div *ngIf="f.email.errors.required">Email is required</div>
                             </div>
                         </div>
@@ -31,7 +31,7 @@
                             <p-password id="password1" formControlName="password" placeholder="Password"
                                 [toggleMask]="true" styleClass="mb-5"
                                 inputStyleClass="w-full p-3 md:w-30rem"></p-password>
-                            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                            <div *ngIf="submitted && f.password.errors" class="invalid-feedback text-red-500">
                                 <div *ngIf="f.password.errors.required">Password is required</div>
                             </div>
                         </div>
@@ -40,16 +40,14 @@
                             <p-password id="confirm_password" formControlName="confirmPassword" placeholder="Confirm Password"
                                 [toggleMask]="true" styleClass="mb-5"
                                 inputStyleClass="w-full p-3 md:w-30rem"></p-password>
-                            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback">
+                            <div *ngIf="submitted && f.confirmPassword.errors" class="invalid-feedback text-red-500">
                                 <div *ngIf="f.confirmPassword.errors.required">Password Confirmation is required</div>
                             </div>
                         </div>
 
                         <div class="flex align-items-center justify-content-between mb-5 gap-5">
-                            <a class="font-medium no-underline ml-2 text-right cursor-pointer"
-                                style="color: var(--primary-color)">Forgot password?</a>
-                            <a [routerLink]="['/authenticate/register']" class="font-medium no-underline ml-2 text-right cursor-pointer">Doesn't have an account?
-                                Sign up now</a>
+                            <a [routerLink]="['/authenticate/login']" class="font-medium no-underline ml-2 text-right cursor-pointer">Having an account?
+                                Sign in now</a>
                         </div>
                         <button pButton pRipple label="Sign In" class="w-full p-3 text-xl" type="submit"></button>
                     </div>

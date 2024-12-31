@@ -4,6 +4,7 @@ import { Observable } from "rxjs";
 import { Task } from "../models/task";
 import { environment } from "src/environments/environment";
 import * as moment from "moment";
+import { query } from "@angular/animations";
 
 @Injectable({
   providedIn: "root",
@@ -14,8 +15,17 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   // Fetch all tasks
-  getTasks(): Observable<any[]> {
-    return this.http.get<any[]>(`${environment.apiUrl}${this.baseUrl}`);
+  getTasks(status?: number, priority?: number, page?: number, limit?: number): Observable<any[]> {
+    const params: any = {};
+    if (status !== undefined) params.status = status;
+    if (priority !== undefined) params.priority = priority;
+    if (page !== undefined) params.page = page;
+    if (limit !== undefined) params.limit = limit;
+
+    const queryString = new URLSearchParams(params).toString();
+
+    const url = queryString ? `${environment.apiUrl}${this.baseUrl}?${queryString}` : `${environment.apiUrl}${this.baseUrl}`;
+    return this.http.get<any[]>(url);
   }
 
   // Fetch a single task by ID
@@ -77,6 +87,9 @@ export class TaskService {
   // Delete a task
   deleteTask(id: string): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}${this.baseUrl}/${id}`);
+  }
+  expireTask(id: string): Observable<Task> {
+    return this.http.patch<Task>(`${environment.apiUrl}${this.baseUrl}/${id}/expire`, {});
   }
   analyzeAI(tasks: Task[]): Observable<any> {
     const taskStrings = tasks.map((task) => 

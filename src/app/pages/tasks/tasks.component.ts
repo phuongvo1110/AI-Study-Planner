@@ -1,69 +1,113 @@
-import { Component, OnInit } from '@angular/core';
-import * as moment from 'moment';
-import { MessageService } from 'primeng/api';
-import { Task, TaskPriority, TaskStatus } from 'src/app/models/task';
-import { TaskService } from 'src/app/services/tasks.service';
+import { Component, OnInit } from "@angular/core";
+import * as moment from "moment";
+import { MessageService } from "primeng/api";
+import { Task, TaskPriority, TaskStatus } from "src/app/models/task";
+import { TaskService } from "src/app/services/tasks.service";
 
 @Component({
-  selector: 'app-tasks',
-  templateUrl: './tasks.component.html',
-  styleUrl: './tasks.component.scss',
+  selector: "app-tasks",
+  templateUrl: "./tasks.component.html",
+  styleUrl: "./tasks.component.scss",
 })
 export class TasksComponent implements OnInit {
   constructor(
     private taskService: TaskService,
     private messageService: MessageService
   ) {}
-
+  totalRecords: number = 0;
+  currentPage: number = 1;
+  rowsPerPage: number = 10;
   taskDialog: boolean = false;
   statusInput: TaskStatus;
   priorityInput: TaskPriority;
   taskForm: Task = {};
   submitted: boolean = false;
+  pageOffset: number;
   analyzeMessage!: string;
   tasksStatus: TaskStatus[] = [
-    { label: 'NotStarted', value: 'notstarted' },
-    { label: 'InProgress', value: 'inprogress' },
-    { label: 'Completed', value: 'completed' },
-    { label: 'Expired', value: 'expired' },
+    { label: "NotStarted", value: "notstarted" },
+    { label: "InProgress", value: "inprogress" },
+    { label: "Completed", value: "completed" },
+    { label: "Expired", value: "expired" },
   ];
 
   taskPriority: TaskPriority[] = [
-    { label: 'Low', value: 'low' },
-    { label: 'Medium', value: 'medium' },
-    { label: 'High', value: 'high' },
+    { label: "Low", value: "low" },
+    { label: "Medium", value: "medium" },
+    { label: "High", value: "high" },
   ];
 
   tasks: Task[] = [];
   filteredTasks: Task[] = [];
   ngOnInit(): void {
     this.loadTasks();
-    console.log(this.statusInput, this.priorityInput)
+    this.pageOffset = this.currentPage;
   }
   filterTasks() {
-    this.filteredTasks = this.tasks.filter((task) => {
-      // @ts-ignore
-      const matchesStatus = !this.statusInput || this.mapStatus(task.status) === this.statusInput;
-        // @ts-ignore
-      const matchesPriority = !this.priorityInput || this.mapPriority(task.priority) === this.priorityInput;
-      return matchesStatus && matchesPriority;
-    });
-    console.log(this.filterTasks)
+    this.currentPage = 1;
+    this.pageOffset = this.currentPage;
+    this.loadTasks();
   }
   clearSearch() {
     this.statusInput = undefined;
     this.priorityInput = undefined;
-    this.filteredTasks = [...this.tasks];
+    this.currentPage = 1;
+    this.pageOffset = this.currentPage;
+    this.loadTasks();
+  }
+  onPageChange(event: any) {
+    console.log(event);
+    this.pageOffset = event.page ? event.page + 1 : 1;
+    this.rowsPerPage = event.rows;
+    this.loadTasks();
+    console.log("Current Page:", this.currentPage);
   }
   // Fetch tasks from the API
   loadTasks() {
-    this.taskService.getTasks().subscribe({
-      next: (data: any) => {
-        this.tasks = data.data.data;
-        this.filteredTasks = [...this.tasks];
-      },
-      error: (err) => this.showErrorMessage('Failed to load tasks'),
-    });
+    const status = this.statusInput
+      ? this.mapStatusNumber(this.statusInput)
+      : undefined;
+    const priority = this.priorityInput
+      ? this.mapPriorityNumber(this.priorityInput)
+      : undefined;
+    this.taskService
+      .getTasks(status, priority, this.pageOffset, this.rowsPerPage)
+      .subscribe({
+        next: (data: any) => {
+          this.totalRecords = data.data.meta.total;
+          this.tasks = data.data.data;
+          if (this.tasks !== null) {
+            const tasksToExpire = this.tasks.filter(
+              //@ts-ignore
+              (task) => moment(task.end_date).isBefore(moment()) && task.status !== 4
+            );
+
+            if (tasksToExpire.length > 0) {
+              let tasksExpired = 0;
+
+              tasksToExpire.forEach((task) => {
+                this.taskService.expireTask(task.id).subscribe({
+                  next: (response: any) => {
+                    tasksExpired++;
+
+                    // Reload tasks after the last task is expired
+                    if (tasksExpired === tasksToExpire.length) {
+                      this.loadTasks();
+                    }
+                  },
+                  error: (err) =>
+                    this.showErrorMessage("Failed to expire task"),
+                });
+              });
+            } else {
+              this.filteredTasks = [...this.tasks];
+            }
+          } else {
+            this.filteredTasks = [];
+          }
+        },
+        error: (err) => this.showErrorMessage("Failed to load tasks"),
+      });
   }
 
   openNew() {
@@ -75,8 +119,8 @@ export class TasksComponent implements OnInit {
     this.taskService.analyzeAI(this.tasks).subscribe({
       next: (response: any) => {
         this.analyzeMessage = response.data.message;
-      }
-    })
+      },
+    });
   }
   // Edit an existing task
   editTask(task: Task) {
@@ -95,38 +139,42 @@ export class TasksComponent implements OnInit {
   deleteTask(task: Task) {
     this.taskService.deleteTask(task.id).subscribe({
       next: () => {
-        this.tasks = this.tasks.filter((t) => t.id !== task.id);
-        this.showSuccessMessage('Task Deleted');
+        this.loadTasks();
+        this.showSuccessMessage("Task Deleted");
       },
-      error: () => this.showErrorMessage('Failed to delete task'),
+      error: () => this.showErrorMessage("Failed to delete task"),
     });
   }
 
   saveProduct() {
     this.submitted = true;
     // @ts-ignore
-    this.taskForm.status = this.taskForm.status.value ? this.taskForm.status.value : this.taskForm.status;   
-     // @ts-ignore
-    this.taskForm.priority = this.taskForm.priority.value ? this.taskForm.priority.value : this.taskForm.priority;
+    this.taskForm.status = this.taskForm.status.value
+      ? this.taskForm.status.value
+      : this.taskForm.status;
+    // @ts-ignore
+    this.taskForm.priority = this.taskForm.priority.value
+      ? this.taskForm.priority.value
+      : this.taskForm.priority;
     if (this.taskForm.id) {
       // Update an existing task
       this.taskService.updateTask(this.taskForm.id, this.taskForm).subscribe({
         next: () => {
           this.loadTasks();
-          this.showSuccessMessage('Task Updated');
+          this.showSuccessMessage("Task Updated");
           this.taskDialog = false;
         },
-        error: () => this.showErrorMessage('Failed to update task'),
+        error: () => this.showErrorMessage("Failed to update task"),
       });
     } else {
       // Create a new task
       this.taskService.createTask(this.taskForm).subscribe({
         next: () => {
           this.loadTasks();
-          this.showSuccessMessage('Task Created');
+          this.showSuccessMessage("Task Created");
           this.taskDialog = false;
         },
-        error: () => this.showErrorMessage('Failed to create task'),
+        error: () => this.showErrorMessage("Failed to create task"),
       });
     }
   }
@@ -138,8 +186,8 @@ export class TasksComponent implements OnInit {
 
   private showSuccessMessage(detail: string) {
     this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
+      severity: "success",
+      summary: "Success",
       detail: detail,
       life: 3000,
     });
@@ -147,30 +195,30 @@ export class TasksComponent implements OnInit {
 
   private showErrorMessage(detail: string) {
     this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
+      severity: "error",
+      summary: "Error",
       detail: detail,
       life: 3000,
     });
   }
   private formatDateToISO(date: string): string {
     // Parse the input date and set the time to 17:00:00
-    return moment(date, 'YYYY-MM-DD HH:mm:ss')
+    return moment(date, "YYYY-MM-DD HH:mm:ss")
       .set({ hour: 17, minute: 0, second: 0, millisecond: 0 })
       .toISOString();
   }
   mapStatus(status: any): string {
     switch (status) {
       case 1:
-        return 'NotStarted';
+        return "NotStarted";
       case 2:
-        return 'InProgress';
+        return "InProgress";
       case 3:
-        return 'Completed';
+        return "Completed";
       case 4:
-        return 'Expired';
+        return "Expired";
       default:
-        throw new Error('Invalid Task Status');
+        throw new Error("Invalid Task Status");
     }
   }
 
@@ -178,39 +226,39 @@ export class TasksComponent implements OnInit {
   mapPriority(priority: any): string {
     switch (priority) {
       case 1:
-        return 'Low';
+        return "Low";
       case 2:
-        return 'Medium';
+        return "Medium";
       case 3:
-        return 'High';
+        return "High";
       default:
-        throw new Error('Invalid Task Priority');
+        throw new Error("Invalid Task Priority");
     }
   }
   mapStatusValue(status: any) {
     switch (status) {
       case 1:
         return {
-          label: 'NotStarted',
-          value: 'notstarted',
+          label: "NotStarted",
+          value: "notstarted",
         };
       case 2:
         return {
-          label: 'InProgress',
-          value: 'inprogress',
+          label: "InProgress",
+          value: "inprogress",
         };
       case 3:
         return {
-          label: 'Completed',
-          value: 'completed',
+          label: "Completed",
+          value: "completed",
         };
       case 4:
         return {
-          label: 'Expired',
-          value: 'expired',
+          label: "Expired",
+          value: "expired",
         };
       default:
-        throw new Error('Invalid Task Status');
+        throw new Error("Invalid Task Status");
     }
   }
 
@@ -219,21 +267,49 @@ export class TasksComponent implements OnInit {
     switch (priority) {
       case 1:
         return {
-          label: 'Low',
-          value: 'low',
+          label: "Low",
+          value: "low",
         };
       case 2:
         return {
-          label: 'Medium',
-          value:'medium',
+          label: "Medium",
+          value: "medium",
         };
       case 3:
         return {
-          label: 'High',
-          value: 'high',
+          label: "High",
+          value: "high",
         };
       default:
-        throw new Error('Invalid Task Priority');
+        throw new Error("Invalid Task Priority");
+    }
+  }
+  mapStatusNumber(status: any): number {
+    switch (status.toLowerCase()) {
+      case "notstarted":
+        return 1;
+      case "inprogress":
+        return 2;
+      case "completed":
+        return 3;
+      case "expired":
+        return 4;
+      default:
+        throw new Error("Invalid Task Status");
+    }
+  }
+
+  // Helper method to map TaskPriority to API enums
+  mapPriorityNumber(priority: any): number {
+    switch (priority.toLowerCase()) {
+      case "low":
+        return 1;
+      case "medium":
+        return 2;
+      case "high":
+        return 3;
+      default:
+        throw new Error("Invalid Task Priority");
     }
   }
 }

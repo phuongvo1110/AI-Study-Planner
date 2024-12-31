@@ -15,6 +15,9 @@ import { InputTextareaModule } from "primeng/inputtextarea";
 import { CalendarModule } from "primeng/calendar";
 import { ToastModule } from "primeng/toast";
 import { AnalyticsComponent } from "./analytics/analytics.component";
+import { ProfileComponent } from "./profile/profile.component";
+import { PasswordModule } from "primeng/password";
+import { PaginatorModule } from "primeng/paginator";
 
 @NgModule({
     imports: [
@@ -30,8 +33,10 @@ import { AnalyticsComponent } from "./analytics/analytics.component";
         DialogModule,
         InputTextareaModule,
         CalendarModule,
-        ToastModule
+        ToastModule,
+        PasswordModule,
+        PaginatorModule
     ],
-    declarations: [WorkspaceComponent, TasksComponent, AnalyticsComponent],
+    declarations: [WorkspaceComponent, TasksComponent, AnalyticsComponent, ProfileComponent],
 })
 export class PagesModule {}

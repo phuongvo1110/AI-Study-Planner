@@ -1,11 +1,13 @@
-import { Injectable } from "@angular/core";
+import { ChangeDetectorRef, Injectable } from "@angular/core";
 import { BehaviorSubject, map, Observable, throwError } from "rxjs";
 import { User } from "../models";
 import { Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 
-@Injectable({ providedIn: "root" })
+@Injectable({ 
+  providedIn: "root",
+ })
 export class AccountService {
   private userSubject: BehaviorSubject<User | null>;
   public user: Observable<User | null>;
@@ -31,12 +33,17 @@ export class AccountService {
             refresh_token: user.data.refresh_token,
             created_at: user.data.user.created_at,
             updated_at: user.data.user.updated_at,
+            avatar: user.data.user.avatar
           };
           localStorage.setItem("user", JSON.stringify(userValue));
           this.userSubject.next(userValue);
           return userValue;
         })
       );
+  }
+  updatedUser(updatedUser: User) {
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    this.userSubject.next(updatedUser);
   }
   // remove user from local storage and set current user to null
   logout() {
@@ -110,5 +117,17 @@ export class AccountService {
   
     // Update the userSubject with the authenticated user
     this.userSubject.next(userValue);
+  }
+  getUserInfo(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/api/v1/users/me`);
+  }
+  updateProfile(id: string, user: User): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/api/v1/users/${id}`, user);
+  }
+  changePassword(id: string, oldPassword: string, newPassword: string): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/api/v1/users/${id}/change-password`, {
+      old_password: oldPassword,
+      new_password: newPassword,
+    })
   }
 }

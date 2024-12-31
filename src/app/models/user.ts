@@ -7,4 +7,5 @@ export class User {
     refresh_token?: string;
     created_at?: string;
     updated_at?: string;
+    avatar?: string;
 }

@@ -64,7 +64,7 @@ export class LoginComponent implements OnInit {
                   this.error = error;
                   console.log(error);
                   this.loading = false;
-                  this.messageService.add({ key: 'tst', severity: 'error', summary: error, detail: 'Validation failed' });
+                  this.messageService.add({ key: 'tst', severity: 'error', summary: 'Validation failed', detail: error.error.message });
               }
           });
   }
