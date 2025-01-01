@@ -40,20 +40,6 @@ import { AuthGuard } from "./helpers/auth.guard";
                 ),
             },
             {
-              path: "documentation",
-              loadChildren: () =>
-                import(
-                  "./demo/components/documentation/documentation.module"
-                ).then((m) => m.DocumentationModule),
-            },
-            {
-              path: "blocks",
-              loadChildren: () =>
-                import("./demo/components/primeblocks/primeblocks.module").then(
-                  (m) => m.PrimeBlocksModule
-                ),
-            },
-            {
               path: "pages",
               loadChildren: () =>
                 import("./demo/components/pages/pages.module").then(

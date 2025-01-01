@@ -1,9 +1,15 @@
 import { ChangeDetectorRef, Component, OnInit, signal } from "@angular/core";
-import { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg } from "@fullcalendar/core";
-import interactionPlugin from '@fullcalendar/interaction';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
+import {
+  CalendarOptions,
+  DateSelectArg,
+  EventApi,
+  EventChangeArg,
+  EventClickArg,
+} from "@fullcalendar/core";
+import interactionPlugin from "@fullcalendar/interaction";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
 import { TaskService } from "src/app/services/tasks.service";
 import { Task } from "src/app/models/task";
 import * as moment from "moment";
@@ -13,10 +19,14 @@ import { MessageService } from "primeng/api";
   selector: "app-workspace",
   templateUrl: "./workspace.component.html",
   styleUrl: "./workspace.component.scss",
-  providers: [MessageService]
+  providers: [MessageService],
 })
 export class WorkspaceComponent implements OnInit {
-  constructor(private changeDetector: ChangeDetectorRef, private taskService: TaskService, private messageService: MessageService) {}
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private taskService: TaskService,
+    private messageService: MessageService
+  ) {}
   ngOnInit(): void {
     this.loadTasks();
   }
@@ -27,8 +37,8 @@ export class WorkspaceComponent implements OnInit {
   timerRunning: boolean = false;
   startTimerCheck: boolean = false;
   startTimer: boolean = false;
-  timerDuration: number = 25 * 60; 
-  breakDuration: number = 5 * 60; 
+  timerDuration: number = 25 * 60;
+  breakDuration: number = 5 * 60;
   remainingTime: number = this.timerDuration;
   breakRemainingTime: number = this.breakDuration;
   interval: any = null;
@@ -50,13 +60,18 @@ export class WorkspaceComponent implements OnInit {
     eventsSet: this.handleEvents.bind(this),
     eventChange: this.handleEventChange.bind(this),
     eventClassNames: ({ event }) => {
-      const status = event.extendedProps['status'];
+      const status = event.extendedProps["status"];
       switch (status) {
-        case 1: return ['status-event status-not-started'];
-        case 2: return ['status-event status-in-progress'];
-        case 3: return ['status-event status-completed'];
-        case 4: return ['status-event status-expired'];
-        default: return [];
+        case 1:
+          return ["status-event status-not-started"];
+        case 2:
+          return ["status-event status-in-progress"];
+        case 3:
+          return ["status-event status-completed"];
+        case 4:
+          return ["status-event status-expired"];
+        default:
+          return [];
       }
     },
     /* you can update a remote database when these fire:
@@ -68,12 +83,12 @@ export class WorkspaceComponent implements OnInit {
   currentEvents = signal<EventApi[]>([]);
 
   handleCalendarToggle() {
-    console.log('Calendar toggle')
+    console.log("Calendar toggle");
     this.calendarVisible.update((bool) => !bool);
   }
 
   handleWeekendsToggle() {
-    console.log('Weekend toggle')
+    console.log("Weekend toggle");
     this.calendarOptions.update((options) => ({
       ...options,
       weekends: !options.weekends,
@@ -82,16 +97,40 @@ export class WorkspaceComponent implements OnInit {
   loadTasks() {
     this.taskService.getTasks().subscribe({
       next: (response: any) => {
-        this.tasks = response.data.data; 
+        this.tasks = response.data.data;
+        if (this.tasks !== null) {
+          const tasksToExpire = this.tasks.filter(
+            //@ts-ignore
+            (task) => moment(task.end_date).isBefore(moment()) && task.status !== 4
+          );
+
+          if (tasksToExpire.length > 0) {
+            let tasksExpired = 0;
+
+            tasksToExpire.forEach((task) => {
+              this.taskService.expireTask(task.id).subscribe({
+                next: (response: any) => {
+                  tasksExpired++;
+
+                  // Reload tasks after the last task is expired
+                  if (tasksExpired === tasksToExpire.length) {
+                    this.loadTasks();
+                  }
+                },
+                error: (err) => console.log(err),
+              });
+            });
+          }
+        }
         const events = this.tasks.map((task) => ({
           id: String(task.id),
           title: task.name,
-          start: task.start_date, 
-          end: task.end_date, 
-          allDay: false, 
+          start: task.start_date,
+          end: task.end_date,
+          allDay: false,
           extendedProps: {
-            status: task.status
-          }
+            status: task.status,
+          },
         }));
 
         // Update the calendar with events
@@ -106,9 +145,9 @@ export class WorkspaceComponent implements OnInit {
     });
   }
   handleEventClick(clickInfo: EventClickArg) {
-    this.selectTask = this.tasks.find(t => t.id === clickInfo.event.id);
+    this.selectTask = this.tasks.find((t) => t.id === clickInfo.event.id);
     this.workspaceDialog = true;
-    if (this.mapStatus(this.selectTask.status) === 'InProgress') {
+    if (this.mapStatus(this.selectTask.status) === "InProgress") {
       this.startTimerCheck = true;
     } else {
       this.startTimerCheck = false;
@@ -126,21 +165,24 @@ export class WorkspaceComponent implements OnInit {
     const updateTask: Task = {
       name: event.title,
       start_date: event.start ? event.start.toISOString() : null,
-      end_date: event.end? event.end.toISOString() : null,
+      end_date: event.end ? event.end.toISOString() : null,
       description: selectedTask.description,
       priority: selectedTask.priority,
       status: selectedTask.status,
-    }
-    const taskForm = {...updateTask, estimated_date: this.calculateEstimatedTime(event.start, event.end)}
+    };
+    const taskForm = {
+      ...updateTask,
+      estimated_date: this.calculateEstimatedTime(event.start, event.end),
+    };
     this.taskService.updateTask(selectedTask.id, taskForm).subscribe({
       next: () => {
-        console.log('Task updated successfully');
+        console.log("Task updated successfully");
         this.loadTasks();
       },
       error: () => {
-        console.error('Failed to update task');
+        console.error("Failed to update task");
       },
-    })
+    });
   }
   handleMarkCompleted() {
     console.log(this.selectTask);
@@ -152,117 +194,156 @@ export class WorkspaceComponent implements OnInit {
       priority: this.selectTask.priority,
       //@ts-ignore
       status: 3,
-    }
-    const taskForm = {...updateTask, estimated_date: this.calculateEstimatedTime(this.selectTask.start_date, this.selectTask.end_date)}
+    };
+    const taskForm = {
+      ...updateTask,
+      estimated_date: this.calculateEstimatedTime(
+        this.selectTask.start_date,
+        this.selectTask.end_date
+      ),
+    };
     this.taskService.updateTask(this.selectTask.id, taskForm).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Task Update', detail: 'Mark Task Completed Successfully', life: 3000 });
+        this.messageService.add({
+          severity: "success",
+          summary: "Task Update",
+          detail: "Mark Task Completed Successfully",
+          life: 3000,
+        });
         this.loadTasks();
         this.workspaceDialog = false;
-      }
-    })
+      },
+    });
   }
-  private calculateEstimatedTime(start_date: string | Date, end_date: string | Date): number {
-      const start = moment(start_date);
-      const end = moment(end_date);
-      return end.diff(start, 'minutes');
+  private calculateEstimatedTime(
+    start_date: string | Date,
+    end_date: string | Date
+  ): number {
+    const start = moment(start_date);
+    const end = moment(end_date);
+    return end.diff(start, "minutes");
+  }
+  mapStatus(status: any): string {
+    switch (status) {
+      case 1:
+        return "NotStarted";
+      case 2:
+        return "InProgress";
+      case 3:
+        return "Completed";
+      case 4:
+        return "Expired";
+      default:
+        throw new Error("Invalid Task Status");
     }
-    mapStatus(status: any): string {
-      switch (status) {
-        case 1:
-          return 'NotStarted';
-        case 2:
-          return 'InProgress';
-        case 3:
-          return 'Completed';
-        case 4:
-          return 'Expired';
-        default:
-          throw new Error('Invalid Task Status');
+  }
+  mapPriority(priority: any): string {
+    switch (priority) {
+      case 1:
+        return "Low";
+      case 2:
+        return "Medium";
+      case 3:
+        return "High";
+      default:
+        throw new Error("Invalid Task Priority");
+    }
+  }
+  startFocusTimer() {
+    this.timerRunning = true;
+    this.remainingTime = this.timerDuration;
+    this.startTimer = true;
+    this.interval = setInterval(() => {
+      this.remainingTime--;
+
+      if (this.remainingTime <= 0) {
+        // API Update Completed Task
+        this.endFocusTimer();
+        this.messageService.add({
+          severity: "success",
+          summary: "Timer Completed",
+          detail: "Focus session complete!",
+          life: 3000,
+        });
       }
-    }
-    mapPriority(priority: any): string {
-      switch (priority) {
-        case 1:
-          return 'Low';
-        case 2:
-          return 'Medium';
-        case 3:
-          return 'High';
-        default:
-          throw new Error('Invalid Task Priority');
+
+      const taskDeadline = moment(this.selectTask.end_date);
+      if (taskDeadline.isBefore(moment())) {
+        this.endFocusTimer();
+        this.messageService.add({
+          severity: "warn",
+          summary: "Timer Break",
+          detail: "Task deadline reached. Timer stopped.",
+          life: 3000,
+        });
       }
-    }
-    startFocusTimer() {
-      this.timerRunning = true;
-      this.remainingTime = this.timerDuration;
-      this.startTimer = true;
-      this.interval = setInterval(() => {
-        this.remainingTime--;
-  
-        if (this.remainingTime <= 0) {
-          // API Update Completed Task
-          this.endFocusTimer();
-          this.messageService.add({ severity: 'success', summary: 'Timer Completed', detail: 'Focus session complete!', life: 3000 });
-        }
-  
-        const taskDeadline = moment(this.selectTask.end_date);
-        if (taskDeadline.isBefore(moment())) {
-          this.endFocusTimer();
-          this.messageService.add({ severity: 'warn', summary: 'Timer Break', detail: 'Task deadline reached. Timer stopped.', life: 3000 });
+    }, 1000);
+  }
+
+  endFocusTimer() {
+    clearInterval(this.interval);
+    clearInterval(this.breakInterval);
+    this.timerRunning = false;
+    this.remainingTime = this.timerDuration;
+    this.startTimer = false;
+    this.timerPaused = false;
+  }
+  pauseFocusTimer() {
+    if (this.timerRunning) {
+      clearInterval(this.interval);
+      this.timerPaused = true;
+      this.timerRunning = false;
+      this.breakInterval = setInterval(() => {
+        this.breakRemainingTime--;
+        if (this.breakRemainingTime <= 0) {
+          this.resumeFocusTimer();
+          this.messageService.add({
+            severity: "warn",
+            summary: "Timer Break",
+            detail: "Break Time reached. Timer continue.",
+            life: 3000,
+          });
         }
       }, 1000);
     }
-  
-    endFocusTimer() {
-      clearInterval(this.interval);
+  }
+  resumeFocusTimer() {
+    if (this.timerPaused) {
       clearInterval(this.breakInterval);
-      this.timerRunning = false;
-      this.remainingTime = this.timerDuration;
-      this.startTimer = false;
+      this.breakRemainingTime = this.breakDuration;
+      this.timerRunning = true;
       this.timerPaused = false;
+
+      this.interval = setInterval(() => {
+        this.remainingTime--;
+
+        if (this.remainingTime <= 0) {
+          // API Update Completed Task
+          this.endFocusTimer();
+          this.messageService.add({
+            severity: "success",
+            summary: "Timer Completed",
+            detail: "Focus session complete!",
+            life: 3000,
+          });
+        }
+
+        const taskDeadline = moment(this.selectTask.end_date);
+        if (taskDeadline.isBefore(moment())) {
+          this.endFocusTimer();
+          this.messageService.add({
+            severity: "warn",
+            summary: "Timer Break",
+            detail: "Task deadline reached. Timer stopped.",
+            life: 3000,
+          });
+        }
+      }, 1000);
     }
-    pauseFocusTimer() {
-      if (this.timerRunning) {
-        clearInterval(this.interval);
-        this.timerPaused = true;
-        this.timerRunning = false;
-        this.breakInterval = setInterval(() => {
-          this.breakRemainingTime--;
-          if (this.breakRemainingTime <= 0) {
-            this.resumeFocusTimer();
-            this.messageService.add({ severity: 'warn', summary: 'Timer Break', detail: 'Break Time reached. Timer continue.', life: 3000 });
-          }
-        }, 1000)
-      }
-    }
-    resumeFocusTimer() {
-      if (this.timerPaused) {
-        clearInterval(this.breakInterval);
-        this.breakRemainingTime = this.breakDuration;
-        this.timerRunning = true;
-        this.timerPaused = false;
-    
-        this.interval = setInterval(() => {
-          this.remainingTime--;
-    
-          if (this.remainingTime <= 0) {
-            // API Update Completed Task
-            this.endFocusTimer();
-            this.messageService.add({ severity: 'success', summary: 'Timer Completed', detail: 'Focus session complete!', life: 3000 });
-          }
-    
-          const taskDeadline = moment(this.selectTask.end_date);
-          if (taskDeadline.isBefore(moment())) {
-            this.endFocusTimer();
-            this.messageService.add({ severity: 'warn', summary: 'Timer Break', detail: 'Task deadline reached. Timer stopped.', life: 3000 });
-          }
-        }, 1000);
-      }
-    }
-    formatTime(seconds: number): string {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
+  }
+  formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  }
 }

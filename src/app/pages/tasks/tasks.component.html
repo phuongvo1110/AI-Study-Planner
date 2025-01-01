@@ -91,7 +91,7 @@
                     <label for="description">Description</label>
                     <textarea id="description" pInputTextarea [(ngModel)]="taskForm.description" required rows="3" cols="20"></textarea>
                 </div>
-                <div class="field">
+                <div class="field" *ngIf="!newTask">
                     <label for="status">Task Status</label>
                     <p-dropdown optionLabel="label" appendTo="body" [(ngModel)]="taskForm.status" inputId="taskStatusInput" optionValue="value" [options]="tasksStatus" placeholder="Select">
                         <ng-template pTemplate="selectedItem">

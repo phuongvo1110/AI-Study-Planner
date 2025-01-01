@@ -24,6 +24,7 @@ export class TasksComponent implements OnInit {
   submitted: boolean = false;
   pageOffset: number;
   analyzeMessage!: string;
+  newTask: boolean = false;
   tasksStatus: TaskStatus[] = [
     { label: "NotStarted", value: "notstarted" },
     { label: "InProgress", value: "inprogress" },
@@ -114,6 +115,7 @@ export class TasksComponent implements OnInit {
     this.taskForm = {};
     this.submitted = false;
     this.taskDialog = true;
+    this.newTask = true;
   }
   analyzeSchedule() {
     this.taskService.analyzeAI(this.tasks).subscribe({
@@ -149,14 +151,14 @@ export class TasksComponent implements OnInit {
   saveProduct() {
     this.submitted = true;
     // @ts-ignore
-    this.taskForm.status = this.taskForm.status.value
-      ? this.taskForm.status.value
-      : this.taskForm.status;
-    // @ts-ignore
     this.taskForm.priority = this.taskForm.priority.value
       ? this.taskForm.priority.value
       : this.taskForm.priority;
     if (this.taskForm.id) {
+      // @ts-ignore
+      this.taskForm.status = this.taskForm.status.value
+        ? this.taskForm.status.value
+        : this.taskForm.status;
       // Update an existing task
       this.taskService.updateTask(this.taskForm.id, this.taskForm).subscribe({
         next: () => {
@@ -168,11 +170,14 @@ export class TasksComponent implements OnInit {
       });
     } else {
       // Create a new task
+      //@ts-ignore
+      this.taskForm.status = this.tasksStatus[0].value;
       this.taskService.createTask(this.taskForm).subscribe({
         next: () => {
           this.loadTasks();
           this.showSuccessMessage("Task Created");
           this.taskDialog = false;
+          this.newTask = false;
         },
         error: () => this.showErrorMessage("Failed to create task"),
       });
@@ -182,6 +187,7 @@ export class TasksComponent implements OnInit {
   hideDialog() {
     this.taskDialog = false;
     this.submitted = false;
+    this.newTask = false;
   }
 
   private showSuccessMessage(detail: string) {
