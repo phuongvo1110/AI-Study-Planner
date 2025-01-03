@@ -18,6 +18,11 @@ import { AnalyticsComponent } from "./analytics/analytics.component";
 import { ProfileComponent } from "./profile/profile.component";
 import { PasswordModule } from "primeng/password";
 import { PaginatorModule } from "primeng/paginator";
+import { TabViewModule } from "primeng/tabview";
+import { PanelModule } from "primeng/panel";
+import { SharedModule } from "../shared/shared.module";
+import { ChartModule } from "primeng/chart";
+import { DividerModule } from "primeng/divider";
 
 @NgModule({
     imports: [
@@ -35,7 +40,12 @@ import { PaginatorModule } from "primeng/paginator";
         CalendarModule,
         ToastModule,
         PasswordModule,
-        PaginatorModule
+        PaginatorModule,
+        TabViewModule,
+        PanelModule,
+        SharedModule,
+        ChartModule,
+        DividerModule
     ],
     declarations: [WorkspaceComponent, TasksComponent, AnalyticsComponent, ProfileComponent],
 })

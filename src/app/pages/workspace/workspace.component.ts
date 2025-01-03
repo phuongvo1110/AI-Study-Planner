@@ -172,7 +172,7 @@ export class WorkspaceComponent implements OnInit {
     };
     const taskForm = {
       ...updateTask,
-      estimated_date: this.calculateEstimatedTime(event.start, event.end),
+      estimated_date: this.calculateEstimatedTime(event.start, event.end)* 60   * 1000,
     };
     this.taskService.updateTask(selectedTask.id, taskForm).subscribe({
       next: () => {
@@ -200,7 +200,7 @@ export class WorkspaceComponent implements OnInit {
       estimated_date: this.calculateEstimatedTime(
         this.selectTask.start_date,
         this.selectTask.end_date
-      ),
+      ) * 60   * 1000,
     };
     this.taskService.updateTask(this.selectTask.id, taskForm).subscribe({
       next: () => {
@@ -226,7 +226,7 @@ export class WorkspaceComponent implements OnInit {
   mapStatus(status: any): string {
     switch (status) {
       case 1:
-        return "NotStarted";
+        return "Pending";
       case 2:
         return "InProgress";
       case 3:
@@ -283,6 +283,20 @@ export class WorkspaceComponent implements OnInit {
   endFocusTimer() {
     clearInterval(this.interval);
     clearInterval(this.breakInterval);
+    const totalTimeSpent = (this.timerDuration - this.remainingTime) * 1000;
+    if (!this.selectTask.total_spend_time) {
+      this.selectTask.total_spend_time = 0
+    }
+    this.selectTask.total_spend_time += totalTimeSpent;
+    console.log(totalTimeSpent);
+    this.taskService.updateTotalTimeSpend(this.selectTask.id, this.selectTask.total_spend_time).subscribe({
+      next: () => {
+        console.log("Total time spent updated successfully");
+      },
+      error: () => {
+        console.error("Failed to update total time spent");
+      },
+    })
     this.timerRunning = false;
     this.remainingTime = this.timerDuration;
     this.startTimer = false;

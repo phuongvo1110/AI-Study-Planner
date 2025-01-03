@@ -1,7 +1,9 @@
 import { Component, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import * as moment from "moment";
 import { MessageService } from "primeng/api";
 import { Task, TaskPriority, TaskStatus } from "src/app/models/task";
+import { AccountService } from "src/app/services/account.service";
 import { TaskService } from "src/app/services/tasks.service";
 
 @Component({
@@ -12,8 +14,10 @@ import { TaskService } from "src/app/services/tasks.service";
 export class TasksComponent implements OnInit {
   constructor(
     private taskService: TaskService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private accountService: AccountService
   ) {}
+  form!: FormGroup;
   totalRecords: number = 0;
   currentPage: number = 1;
   rowsPerPage: number = 10;
@@ -21,12 +25,18 @@ export class TasksComponent implements OnInit {
   statusInput: TaskStatus;
   priorityInput: TaskPriority;
   taskForm: Task = {};
+  userForm: any = {
+    email: '',
+    password: '',
+  }
   submitted: boolean = false;
+  submittedUser: boolean = false;
   pageOffset: number;
   analyzeMessage!: string;
   newTask: boolean = false;
+  createUserModal: boolean = false;
   tasksStatus: TaskStatus[] = [
-    { label: "NotStarted", value: "notstarted" },
+    { label: "Pending", value: "pending" },
     { label: "InProgress", value: "inprogress" },
     { label: "Completed", value: "completed" },
     { label: "Expired", value: "expired" },
@@ -179,17 +189,40 @@ export class TasksComponent implements OnInit {
           this.taskDialog = false;
           this.newTask = false;
         },
-        error: () => this.showErrorMessage("Failed to create task"),
+        error: (error: any) => {
+          this.showErrorMessage(error.error.message)
+          if (error.error.error_code === 30006) {
+            this.createUserModal = true;
+            this.taskDialog = false;
+          }
+        },
       });
     }
   }
 
-  hideDialog() {
+  hideTaskDialog() {
     this.taskDialog = false;
     this.submitted = false;
     this.newTask = false;
   }
-
+  hideUserDialog() {
+    this.createUserModal = false;
+    this.submittedUser = false;
+  }
+  saveUser() {
+    this.submittedUser = true;
+    this.accountService.upgradeMember(this.userForm.email, this.userForm.password).pipe().subscribe({
+      next: (response: any) => {
+        console.log(response);
+        this.showSuccessMessage("User upgraded successfully");
+        this.hideUserDialog();
+        window.location.reload();
+      },
+      error: (error: any) => {
+        this.showErrorMessage(error.error.message);
+      },
+    })
+  }
   private showSuccessMessage(detail: string) {
     this.messageService.add({
       severity: "success",
@@ -216,7 +249,7 @@ export class TasksComponent implements OnInit {
   mapStatus(status: any): string {
     switch (status) {
       case 1:
-        return "NotStarted";
+        return "Pending";
       case 2:
         return "InProgress";
       case 3:
@@ -245,8 +278,8 @@ export class TasksComponent implements OnInit {
     switch (status) {
       case 1:
         return {
-          label: "NotStarted",
-          value: "notstarted",
+          label: "Pending",
+          value: "pending",
         };
       case 2:
         return {
@@ -292,7 +325,7 @@ export class TasksComponent implements OnInit {
   }
   mapStatusNumber(status: any): number {
     switch (status.toLowerCase()) {
-      case "notstarted":
+      case "pending":
         return 1;
       case "inprogress":
         return 2;

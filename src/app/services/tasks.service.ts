@@ -49,7 +49,8 @@ export class TaskService {
       priority: this.mapPriority(task.priority),
       start_date: formattedStartDate,
       end_date: formattedEndDate,
-      estimated_time: estimatedTime,
+      estimated_time: estimatedTime * 60 * 1000,
+      total_spend_time: 0,
     };
     return this.http.post<Task>(`${environment.apiUrl}${this.baseUrl}`, body);
   }
@@ -76,7 +77,8 @@ export class TaskService {
           : this.mapPriority(task.priority),
       start_date: formattedStartDate,
       end_date: formattedEndDate,
-      estimated_time: estimatedTime,
+      estimated_time: estimatedTime * 60 * 1000,
+      total_spend_time: task.total_spend_time,
     };
     return this.http.put<Task>(
       `${environment.apiUrl}${this.baseUrl}/${id}`,
@@ -90,6 +92,11 @@ export class TaskService {
   }
   expireTask(id: string): Observable<Task> {
     return this.http.patch<Task>(`${environment.apiUrl}${this.baseUrl}/${id}/expire`, {});
+  }
+  updateTotalTimeSpend(id: string, timeSpend: number) : Observable<Task> {
+    return this.http.patch<Task>(`${environment.apiUrl}${this.baseUrl}/${id}/total-spend-time`, {
+      total_spend_time: timeSpend
+    })
   }
   analyzeAI(tasks: Task[]): Observable<any> {
     const taskStrings = tasks.map((task) => 
@@ -114,7 +121,7 @@ export class TaskService {
   }
   private mapStatus(status: any): number {
     switch (status.toLowerCase()) {
-      case "notstarted":
+      case "pending":
         return 1;
       case "inprogress":
         return 2;

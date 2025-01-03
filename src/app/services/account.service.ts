@@ -41,6 +41,32 @@ export class AccountService {
         })
       );
   }
+  loginAsGuest() {
+    return this.http
+      .post(`${environment.apiUrl}/api/v1/session/guest/signin`, {})
+      .pipe(
+        map((user: any) => {
+          const userValue: User = {
+            id: user.data.user.id,
+            username: user.data.user.username,
+            access_token: user.data.access_token,
+            refresh_token: user.data.refresh_token,
+            created_at: user.data.user.created_at,
+            updated_at: user.data.user.updated_at,
+            avatar: user.data.user.avatar
+          };
+          localStorage.setItem("user", JSON.stringify(userValue));
+          this.userSubject.next(userValue);
+          return userValue;
+        })
+      );
+  }
+  upgradeMember(email: string, password: string): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/api/v1/users/guest/update`, {
+      email: email,
+      password: password
+    });
+  }
   updatedUser(updatedUser: User) {
     localStorage.setItem("user", JSON.stringify(updatedUser));
     this.userSubject.next(updatedUser);

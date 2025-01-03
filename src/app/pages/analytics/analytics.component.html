@@ -1,1 +1,107 @@
-<p>analytics works!</p>
+<div class="card">
+    <p-tabView orientation="left">
+        <p-tabPanel header="Summary">
+            <div class="flex flex-col gap-4">
+                <p-panel [toggleable]="true" header="AI Feedback">
+                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Feedback with AI"
+                        icon="pi pi-desktop" (click)="feedbackAI()"></button>
+                        @if (messageAI) {
+                            <span class="mb-3 mt-3 font-bold">
+                                <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Excellent Area</h5>
+                                <ul class="font-bold text-lg">
+                                    @for (message of messageAI.excellent_areas; track $index) {
+                                        <li>{{ message }}</li>
+                                    }
+                                </ul>
+                                <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Motivation</h5>
+                                <ul class="font-bold text-lg">
+                                    @for (message of messageAI.motivation; track $index) {
+                                        <li>{{ message }}</li>
+                                    }
+                                </ul>
+                                <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Suggestions</h5>
+                                <ul class="font-bold text-lg">
+                                    @for (message of messageAI.suggestions; track $index) {
+                                        <li>{{ message }}</li>
+                                    }
+                                </ul>
+                            </span>
+                        }
+                </p-panel>
+                <p-panel header="Activity Summary" [toggleable]="true">
+                    <div class="grid">
+                        <div class="col-3 relative"><app-summary-view label="hours focused" icon="pi pi-clock"
+                                [value]="totalTimeFocused"></app-summary-view>
+                        </div>
+                        <div class="col-3 relative"><app-summary-view label="days accessed" icon="pi pi-calendar"
+                                [value]="daysAccessed"></app-summary-view>
+                        </div>
+                        <div class="col-3 relative"><app-summary-view label="percent of working time" icon="pi pi-calendar"
+                                [value]="analytics?.total_spent_time_ratio"></app-summary-view>
+                        </div>
+                    </div>
+                </p-panel>
+                <p-panel header="Focus Hours" [toggleable]="true">
+                    <p-chart type="bar" [data]="barData" [options]="barOptions"></p-chart>
+                </p-panel>
+            </div>
+        </p-tabPanel>
+        <p-tabPanel header="Detail">
+            <p-divider layout="horizontal">
+                <h6 class="font-bold">Focus Time Detail</h6>
+            </p-divider>
+            <p-table #dtDetail [value]="tasks" [scrollable]="true" responsiveLayout="scroll"
+                styleClass="p-datatable-gridlines" [sortMode]="'multiple'"
+                [globalFilterFields]="['name', 'start_date','minutes']">
+                <ng-template pTemplate="caption">
+                    <div class="flex justify-content-between flex-column sm:flex-row">
+                        <button pButton label="Clear" class="p-button-outlined mb-2" icon="pi pi-filter-slash"
+                            (click)="dtDetail.clear()"></button>
+                        <span class="p-input-icon-left mb-2">
+                            <i class="pi pi-search"></i>
+                            <input (input)="dtDetail.filterGlobal(filter.value, 'contains')" pInputText type="text"
+                                #filter placeholder="Search Keyword" class="w-full" />
+                        </span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="name">Date <p-sortIcon field="start_date"></p-sortIcon></th>
+                        <th pSortableColumn="start_date">Task <p-sortIcon field="name"></p-sortIcon></th>
+                        <th pSortableColumn="minutes">Minutes <p-sortIcon field="minutes"></p-sortIcon></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-task>
+                    <tr>
+                        <td>{{ task.start_date | date: 'MM/dd/yyyy hh:mm a' }}</td>
+                        <td>{{ task.name }}</td>
+                        <td>{{ (task.total_spend_time/60/1000) | number: '1.0-3'}}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <p-divider layout="horizontal">
+                <h6 class="font-bold mt-2">Task Status Detail</h6>
+            </p-divider>
+            <p-table [value]="totalTasksByStatus | keyvalue" responsiveLayout="scroll"
+                styleClass="p-datatable-gridlines">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Status</th>
+                        <th>Total Tasks</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td><span [class]="'task-badge status-' + item.key">{{ item.key }}</span></td>
+                        <td>{{ item.value }}</td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td colspan="6">No tasks available.</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-tabPanel>
+    </p-tabView>
+</div>

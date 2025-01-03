@@ -23,7 +23,7 @@
                         [class]="'priority-badge priority-' + mapPriority(selectTask.priority).toLowerCase()">{{mapPriority(selectTask.priority)}}</span>
                 </div>
                 <div class="action mt-3">
-                    <p-button label="Mark as completed" icon="pi pi-check" (onClick)="handleMarkCompleted()"></p-button>
+                    <p-button [disabled]="selectTask.status === 3" label="Mark as completed" icon="pi pi-check" (onClick)="handleMarkCompleted()"></p-button>
                 </div>
                 <hr class="w-48 h-1 mx-auto my-4 bg-gray-300 border-0 rounded md:my-10 dark:bg-gray-700">
                 <div class="focus-timer flex flex-col items-center">

@@ -1,42 +1,55 @@
-<p-toast key="tst"></p-toast>
+<p-toast></p-toast>
 <div class="grid">
     <div class="col-12">
         <div class="card">
             <div class="flex flex-col flex-wrap justify-content-center">
                 <div class="w-full flex gap-3 mb-3">
                     <p-button (onClick)="openNew()" styleClass="w-[150px]" label="Add new" icon="pi pi-plus"></p-button>
-                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Analyze with AI" icon="pi pi-desktop" (click)="analyzeSchedule()"></button>
-                    <p-dropdown styleClass="w-[200px]" [(ngModel)]="statusInput" inputId="taskStatus" optionValue="label" [options]="tasksStatus" placeholder="All Status">
+                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Analyze with AI"
+                        icon="pi pi-desktop" (click)="analyzeSchedule()"></button>
+                    <p-dropdown styleClass="w-[200px]" [(ngModel)]="statusInput" inputId="taskStatus"
+                        optionValue="label" [options]="tasksStatus" placeholder="All Status">
                         <ng-template pTemplate="selectedItem">
-                            <span *ngIf="statusInput" [class]="'task-badge status-' + statusInput.toString().trim().toLowerCase()">{{statusInput}}</span>
+                            <span *ngIf="statusInput"
+                                [class]="'task-badge status-' + statusInput.toString().trim().toLowerCase()">{{statusInput}}</span>
                         </ng-template>
                         <ng-template let-option pTemplate="item">
                             <span [class]="'task-badge status-' + option.value">{{option.label}}</span>
                         </ng-template>
                     </p-dropdown>
-                    <p-dropdown styleClass="w-[200px]" [(ngModel)]="priorityInput" inputId="taskPriority" optionValue="label" [options]="taskPriority" placeholder="All Priority" >
+                    <p-dropdown styleClass="w-[200px]" [(ngModel)]="priorityInput" inputId="taskPriority"
+                        optionValue="label" [options]="taskPriority" placeholder="All Priority">
                         <ng-template pTemplate="selectedItem">
-                            <span *ngIf="priorityInput" [class]="'priority-badge priority-' + priorityInput.toString().trim().toLowerCase()">{{priorityInput}}</span>
+                            <span *ngIf="priorityInput"
+                                [class]="'priority-badge priority-' + priorityInput.toString().trim().toLowerCase()">{{priorityInput}}</span>
                         </ng-template>
                         <ng-template let-option pTemplate="item">
                             <span [class]="'priority-badge priority-' + option.value">{{option.label}}</span>
                         </ng-template>
                     </p-dropdown>
-                    <button pButton pRipple label="Clear Search" type="button" icon="pi pi-times" class="p-button-outlined p-button-danger" [disabled]="statusInput === undefined && priorityInput === undefined" (click)="clearSearch()"></button>
-                    <button label="Search" pButton pRipple type="button" icon="pi pi-search" class="p-button-outlined" (click)="filterTasks()"></button>
+                    <button pButton pRipple label="Clear Search" type="button" icon="pi pi-times"
+                        class="p-button-outlined p-button-danger"
+                        [disabled]="statusInput === undefined && priorityInput === undefined"
+                        (click)="clearSearch()"></button>
+                    <button label="Search" pButton pRipple type="button" icon="pi pi-search" class="p-button-outlined"
+                        (click)="filterTasks()"></button>
                 </div>
             </div>
             <span class="mb-3 mt-3 font-bold" *ngIf="analyzeMessage !== ''" [innerHTML]="analyzeMessage"></span>
-            <p-table #dt1 [value]="filteredTasks" [rows]="rowsPerPage" [responsiveLayout]="'scroll'" [sortMode]="'multiple'" [globalFilterFields]="['name', 'description', 'priority.value', 'status.value', 'start_date', 'end_date']">
+            <p-table #dt1 [value]="filteredTasks" [rows]="rowsPerPage" [responsiveLayout]="'scroll'"
+                [sortMode]="'multiple'"
+                [globalFilterFields]="['name', 'description', 'priority.value', 'status.value', 'start_date', 'end_date']">
                 <ng-template pTemplate="caption">
-					<div class="flex justify-content-between flex-column sm:flex-row">
-						<button pButton label="Clear" class="p-button-outlined mb-2" icon="pi pi-filter-slash" (click)="dt1.clear()"></button>
-						<span class="p-input-icon-left mb-2">
-							<i class="pi pi-search"></i>
-							<input (input)="dt1.filterGlobal(filter.value, 'contains')" pInputText type="text" #filter placeholder="Search Keyword" class="w-full"/>
-						</span>
-					</div>
-				</ng-template>
+                    <div class="flex justify-content-between flex-column sm:flex-row">
+                        <button pButton label="Clear" class="p-button-outlined mb-2" icon="pi pi-filter-slash"
+                            (click)="dt1.clear()"></button>
+                        <span class="p-input-icon-left mb-2">
+                            <i class="pi pi-search"></i>
+                            <input (input)="dt1.filterGlobal(filter.value, 'contains')" pInputText type="text" #filter
+                                placeholder="Search Keyword" class="w-full" />
+                        </span>
+                    </div>
+                </ng-template>
                 <!-- Table Header -->
                 <ng-template pTemplate="header">
                     <tr>
@@ -49,25 +62,31 @@
                         <th></th>
                     </tr>
                 </ng-template>
-            
+
                 <!-- Table Body -->
                 <ng-template pTemplate="body" let-task>
                     <tr>
                         <td>{{ task.name }}</td>
                         <td>{{ task.description }}</td>
-                        <td><span [class]="'priority-badge priority-' + mapPriority(task.priority).toLowerCase()">{{mapPriority(task.priority)}}</span></td>
-                        <td><span [class]="'task-badge status-' + mapStatus(task.status).toLowerCase()">{{mapStatus(task.status)}}</span></td>
+                        <td><span
+                                [class]="'priority-badge priority-' + mapPriority(task.priority).toLowerCase()">{{mapPriority(task.priority)}}</span>
+                        </td>
+                        <td><span
+                                [class]="'task-badge status-' + mapStatus(task.status).toLowerCase()">{{mapStatus(task.status)}}</span>
+                        </td>
                         <td>{{ task.start_date | date: 'MM/dd/yyyy hh:mm a' }}</td>
                         <td>{{ task.end_date | date: 'MM/dd/yyyy hh:mm a' }}</td>
                         <td>
                             <div class="flex">
-                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editTask(task)"></button>
-                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deleteTask(task)"></button>
+                                <button pButton pRipple icon="pi pi-pencil"
+                                    class="p-button-rounded p-button-success mr-2" (click)="editTask(task)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning"
+                                    (click)="deleteTask(task)"></button>
                             </div>
                         </td>
                     </tr>
                 </ng-template>
-            
+
                 <!-- Empty State -->
                 <ng-template pTemplate="emptymessage">
                     <tr>
@@ -75,27 +94,33 @@
                     </tr>
                 </ng-template>
                 <ng-template pTemplate="summary">
-                    <p-paginator appendTo="body" (onPageChange)="onPageChange($event)" [first]="currentPage" [totalRecords]="totalRecords" [rows]="rowsPerPage"></p-paginator>
+                    <p-paginator appendTo="body" (onPageChange)="onPageChange($event)" [first]="currentPage"
+                        [totalRecords]="totalRecords" [rows]="rowsPerPage"></p-paginator>
                 </ng-template>
             </p-table>
-            
+
         </div>
-        <p-dialog [(visible)]="taskDialog" [style]="{width: '450px'}" header="Task Details" [modal]="true" class="p-fluid">
+        <p-dialog [(visible)]="taskDialog" [style]="{width: '450px'}" header="Task Details" [modal]="true"
+            class="p-fluid">
             <ng-template pTemplate="content">
                 <div class="field">
                     <label for="name">Name</label>
-                    <input type="text" pInputText id="name" [(ngModel)]="taskForm.name" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !taskForm.name}"/>
+                    <input type="text" pInputText id="name" [(ngModel)]="taskForm.name" required autofocus
+                        [ngClass]="{'ng-invalid ng-dirty' : submitted && !taskForm.name}" />
                     <small class="ng-dirty ng-invalid" *ngIf="submitted && !taskForm.name">Name is required.</small>
                 </div>
                 <div class="field">
                     <label for="description">Description</label>
-                    <textarea id="description" pInputTextarea [(ngModel)]="taskForm.description" required rows="3" cols="20"></textarea>
+                    <textarea id="description" pInputTextarea [(ngModel)]="taskForm.description" required rows="3"
+                        cols="20"></textarea>
                 </div>
                 <div class="field" *ngIf="!newTask">
                     <label for="status">Task Status</label>
-                    <p-dropdown optionLabel="label" appendTo="body" [(ngModel)]="taskForm.status" inputId="taskStatusInput" optionValue="value" [options]="tasksStatus" placeholder="Select">
+                    <p-dropdown optionLabel="label" appendTo="body" [(ngModel)]="taskForm.status"
+                        inputId="taskStatusInput" optionValue="value" [options]="tasksStatus" placeholder="Select">
                         <ng-template pTemplate="selectedItem">
-                            <span *ngIf="taskForm && taskForm.status" [class]="'task-badge status-' + taskForm.status.toString().toLowerCase()">{{taskForm.status}}</span>
+                            <span *ngIf="taskForm && taskForm.status"
+                                [class]="'task-badge status-' + taskForm.status.toString().toLowerCase()">{{taskForm.status}}</span>
                         </ng-template>
                         <ng-template let-option pTemplate="item">
                             <span [class]="'task-badge status-' + option.value">{{option.label}}</span>
@@ -104,9 +129,11 @@
                 </div>
                 <div class="field">
                     <label for="priority">Task Priority</label>
-                    <p-dropdown appendTo="body" optionLabel="label" [(ngModel)]="taskForm.priority" inputId="taskStatusInput" optionValue="value" [options]="taskPriority" placeholder="Select">
+                    <p-dropdown appendTo="body" optionLabel="label" [(ngModel)]="taskForm.priority"
+                        inputId="taskStatusInput" optionValue="value" [options]="taskPriority" placeholder="Select">
                         <ng-template pTemplate="selectedItem">
-                            <span *ngIf="taskForm && taskForm.priority" [class]="'priority-badge priority-' + taskForm.priority.toString().toLowerCase()">{{taskForm.priority}}</span>
+                            <span *ngIf="taskForm && taskForm.priority"
+                                [class]="'priority-badge priority-' + taskForm.priority.toString().toLowerCase()">{{taskForm.priority}}</span>
                         </ng-template>
                         <ng-template let-option pTemplate="item">
                             <span [class]="'priority-badge priority-' + option.value">{{option.label}}</span>
@@ -115,17 +142,46 @@
                 </div>
                 <div class="field">
                     <label for="start_date">Start Date</label>
-                    <p-calendar appendTo="body" [showTime]="true" hourFormat="12" inputId="start_date" [(ngModel)]="taskForm.start_date" [showIcon]="true" ></p-calendar>
+                    <p-calendar appendTo="body" [showTime]="true" hourFormat="12" inputId="start_date"
+                        [(ngModel)]="taskForm.start_date" [showIcon]="true"></p-calendar>
                 </div>
                 <div class="field">
                     <label for="end_date">End Date</label>
-                    <p-calendar [showTime]="true" hourFormat="12" inputId="end_date" [(ngModel)]="taskForm.end_date" class="ng-invalid ng-dirty" [showIcon]="true"></p-calendar>
+                    <p-calendar [showTime]="true" hourFormat="12" inputId="end_date" [(ngModel)]="taskForm.end_date"
+                        class="ng-invalid ng-dirty" [showIcon]="true"></p-calendar>
                 </div>
             </ng-template>
 
             <ng-template pTemplate="footer">
-                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
-                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveProduct()"></button>
+                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+                    (click)="hideTaskDialog()"></button>
+                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+                    (click)="saveProduct()"></button>
+            </ng-template>
+        </p-dialog>
+        <p-dialog [(visible)]="createUserModal" [style]="{width: '450px'}" header="Upgrade to Member" [modal]="true"
+            class="p-fluid">
+            <ng-template pTemplate="content">
+                <span class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade to add more tasks</span>
+                <div class="field">
+                    <label for="name">Email</label>
+                    <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
+                        [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
+                    <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is required.</small>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
+                        styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+                    <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password is required.</small>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+                    (click)="hideUserDialog()"></button>
+                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+                    (click)="saveUser()"></button>
             </ng-template>
         </p-dialog>
     </div>

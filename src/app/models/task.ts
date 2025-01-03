@@ -14,4 +14,5 @@ export interface Task {
     status?: TaskStatus;
     start_date?: string | Date;
     end_date?: string | Date;
+    total_spend_time?: number;
 }

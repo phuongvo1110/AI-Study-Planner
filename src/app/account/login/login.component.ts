@@ -39,7 +39,20 @@ export class LoginComponent implements OnInit {
 
   // convenience getter for easy access to form fields
   get f() { return this.form.controls; }
-
+  signInAsGuest() {
+    this.accountService.loginAsGuest().pipe().subscribe({
+        next: (response: any) => {
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+            this.router.navigateByUrl(returnUrl);
+        },
+        error: error => {
+            this.error = error;
+            console.log(error);
+            this.loading = false;
+            this.messageService.add({ key: 'tst', severity: 'error', summary: 'Validation failed', detail: error.error.message });
+        }
+    })
+  }
   onSubmit() {
       this.submitted = true;
 
