@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import * as moment from "moment";
 import { MessageService } from "primeng/api";
+import { User } from "src/app/models";
 import { Task, TaskPriority, TaskStatus } from "src/app/models/task";
 import { AccountService } from "src/app/services/account.service";
 import { TaskService } from "src/app/services/tasks.service";
@@ -18,6 +19,7 @@ export class TasksComponent implements OnInit {
     private accountService: AccountService
   ) {}
   form!: FormGroup;
+  user?: User | null;
   totalRecords: number = 0;
   currentPage: number = 1;
   rowsPerPage: number = 10;
@@ -51,6 +53,10 @@ export class TasksComponent implements OnInit {
   tasks: Task[] = [];
   filteredTasks: Task[] = [];
   ngOnInit(): void {
+    this.accountService.user.subscribe((user) => {
+      this.user = user;
+    })
+    this.user = this.accountService.userValue;
     this.loadTasks();
     this.pageOffset = this.currentPage;
   }
@@ -128,11 +134,15 @@ export class TasksComponent implements OnInit {
     this.newTask = true;
   }
   analyzeSchedule() {
-    this.taskService.analyzeAI(this.tasks).subscribe({
-      next: (response: any) => {
-        this.analyzeMessage = response.data.message;
-      },
-    });
+    if (this.user.role && this.user.role === 'CUSTOMER') {
+      this.taskService.analyzeAI(this.tasks).subscribe({
+        next: (response: any) => {
+          this.analyzeMessage = response.data.message;
+        },
+      });
+    } else {
+      this.createUserModal = true;
+    }
   }
   // Edit an existing task
   editTask(task: Task) {

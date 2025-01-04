@@ -33,7 +33,8 @@ export class AccountService {
             refresh_token: user.data.refresh_token,
             created_at: user.data.user.created_at,
             updated_at: user.data.user.updated_at,
-            avatar: user.data.user.avatar
+            avatar: user.data.user.avatar,
+            role: user.data.user.role,
           };
           localStorage.setItem("user", JSON.stringify(userValue));
           this.userSubject.next(userValue);
@@ -65,7 +66,19 @@ export class AccountService {
     return this.http.patch<User>(`${environment.apiUrl}/api/v1/users/guest/update`, {
       email: email,
       password: password
-    });
+    }).pipe(
+      map((user: any) => {
+        const currentUser = this.userValue;
+        const userValue: User = {
+          ...currentUser,
+          role: "CUSTOMER",
+          email: email
+        };
+        localStorage.setItem("user", JSON.stringify(userValue));
+        this.userSubject.next(userValue);
+        return userValue;
+      })
+    );;
   }
   updatedUser(updatedUser: User) {
     localStorage.setItem("user", JSON.stringify(updatedUser));

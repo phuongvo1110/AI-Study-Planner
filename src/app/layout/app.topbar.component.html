@@ -17,7 +17,7 @@
     <div #topbarmenu class="layout-topbar-menu"
         [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
         <button pButton (click)="userMenuRef.toggle($event)" class="p-link layout-topbar-button">
-            <img [src]="this.user.avatar && this.user.avatar !== '' ? this.user.avatar : 'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg'"
+            <img [src]="this.user.avatar !== undefined && this.user.avatar !== '' ? this.user.avatar : 'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg'"
                 alt="Image" height="30" class="rounded-full">
             <span>Profile</span>
         </button>
@@ -50,3 +50,30 @@
         </button>
     </ng-template>
 </p-menu>
+
+<p-dialog [(visible)]="createUserModal" [style]="{width: '450px'}" header="Upgrade to Member" [modal]="true"
+class="p-fluid">
+<ng-template pTemplate="content">
+    <span class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade to add more tasks and use AI</span>
+    <div class="field">
+        <label for="name">Email</label>
+        <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
+        <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is required.</small>
+    </div>
+    <div class="field">
+        <label for="password">Password</label>
+        <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
+            styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+        <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password is required.</small>
+    </div>
+</ng-template>
+
+<ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+        (click)="hideUserDialog()"></button>
+    <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text"
+        (click)="saveUser()"></button>
+</ng-template>
+</p-dialog>
+<p-toast></p-toast>

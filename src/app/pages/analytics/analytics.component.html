@@ -1,32 +1,35 @@
 <div class="card">
+    @if (user.role && user.role === 'CUSTOMER') {
+
     <p-tabView orientation="left">
         <p-tabPanel header="Summary">
             <div class="flex flex-col gap-4">
                 <p-panel [toggleable]="true" header="AI Feedback">
-                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Feedback with AI"
-                        icon="pi pi-desktop" (click)="feedbackAI()"></button>
-                        @if (messageAI) {
-                            <span class="mb-3 mt-3 font-bold">
-                                <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Excellent Area</h5>
-                                <ul class="font-bold text-lg">
-                                    @for (message of messageAI.excellent_areas; track $index) {
-                                        <li>{{ message }}</li>
-                                    }
-                                </ul>
-                                <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Motivation</h5>
-                                <ul class="font-bold text-lg">
-                                    @for (message of messageAI.motivation; track $index) {
-                                        <li>{{ message }}</li>
-                                    }
-                                </ul>
-                                <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Suggestions</h5>
-                                <ul class="font-bold text-lg">
-                                    @for (message of messageAI.suggestions; track $index) {
-                                        <li>{{ message }}</li>
-                                    }
-                                </ul>
-                            </span>
-                        }
+                    <button [disabled]="!analytics" styleClass="w-[150px]" pButton class="p-button-info"
+                        label="Feedback with AI" icon="pi pi-desktop" (click)="feedbackAI()"
+                        [pTooltip]="!analytics ? 'Complete Task to get Feedback':'Get Feedback from AI'"></button>
+                    @if (messageAI) {
+                    <span class="mb-3 mt-3 font-bold">
+                        <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Excellent Area</h5>
+                        <ul class="font-bold text-lg">
+                            @for (message of messageAI.excellent_areas; track $index) {
+                            <li>{{ message }}</li>
+                            }
+                        </ul>
+                        <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Motivation</h5>
+                        <ul class="font-bold text-lg">
+                            @for (message of messageAI.motivation; track $index) {
+                            <li>{{ message }}</li>
+                            }
+                        </ul>
+                        <h5 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500">Suggestions</h5>
+                        <ul class="font-bold text-lg">
+                            @for (message of messageAI.suggestions; track $index) {
+                            <li>{{ message }}</li>
+                            }
+                        </ul>
+                    </span>
+                    }
                 </p-panel>
                 <p-panel header="Activity Summary" [toggleable]="true">
                     <div class="grid">
@@ -36,13 +39,18 @@
                         <div class="col-3 relative"><app-summary-view label="days accessed" icon="pi pi-calendar"
                                 [value]="daysAccessed"></app-summary-view>
                         </div>
-                        <div class="col-3 relative"><app-summary-view label="percent of working time" icon="pi pi-calendar"
-                                [value]="analytics?.total_spent_time_ratio"></app-summary-view>
+                        <div class="col-3 relative"><app-summary-view label="percent of working time"
+                                icon="pi pi-percentage"
+                                [value]="analytics?.total_spent_time_ratio ? analytics.total_spent_time_ratio : 0"></app-summary-view>
                         </div>
                     </div>
                 </p-panel>
                 <p-panel header="Focus Hours" [toggleable]="true">
+                    @if (analytics) {
                     <p-chart type="bar" [data]="barData" [options]="barOptions"></p-chart>
+                    } @else {
+                    <span>No Task available to show statistic</span>
+                    }
                 </p-panel>
             </div>
         </p-tabPanel>
@@ -104,4 +112,36 @@
             </p-table>
         </p-tabPanel>
     </p-tabView>
+    } @else {
+    <div class="flex flex-col items-center justify-center text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 gap-3">
+        <span>Upgrade to see statistics</span>
+        <p-button label="Upgrade" icon="pi pi-dollar" (onClick)="upgradeMember()"></p-button>
+    </div>
+    }
 </div>
+<p-dialog [(visible)]="createUserModal" [style]="{width: '450px'}" header="Upgrade to Member" [modal]="true"
+class="p-fluid">
+<ng-template pTemplate="content">
+    <span class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade to see statistics</span>
+    <div class="field">
+        <label for="name">Email</label>
+        <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
+            [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
+        <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is required.</small>
+    </div>
+    <div class="field">
+        <label for="password">Password</label>
+        <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
+            styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+        <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password is required.</small>
+    </div>
+</ng-template>
+
+<ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+        (click)="hideUserDialog()"></button>
+    <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text"
+        (click)="saveUser()"></button>
+</ng-template>
+</p-dialog>
+<p-toast></p-toast>

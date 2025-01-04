@@ -5,7 +5,7 @@
             <div class="flex flex-col flex-wrap justify-content-center">
                 <div class="w-full flex gap-3 mb-3">
                     <p-button (onClick)="openNew()" styleClass="w-[150px]" label="Add new" icon="pi pi-plus"></p-button>
-                    <button styleClass="w-[150px]" pButton class="p-button-info" label="Analyze with AI"
+                    <button styleClass="w-[150px]" pButton class="p-button-info" [disabled]="!tasks" label="Analyze with AI"
                         icon="pi pi-desktop" (click)="analyzeSchedule()"></button>
                     <p-dropdown styleClass="w-[200px]" [(ngModel)]="statusInput" inputId="taskStatus"
                         optionValue="label" [options]="tasksStatus" placeholder="All Status">
@@ -162,7 +162,7 @@
         <p-dialog [(visible)]="createUserModal" [style]="{width: '450px'}" header="Upgrade to Member" [modal]="true"
             class="p-fluid">
             <ng-template pTemplate="content">
-                <span class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade to add more tasks</span>
+                <span class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade to add more tasks and use AI</span>
                 <div class="field">
                     <label for="name">Email</label>
                     <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
@@ -180,7 +180,7 @@
             <ng-template pTemplate="footer">
                 <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
                     (click)="hideUserDialog()"></button>
-                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+                <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text"
                     (click)="saveUser()"></button>
             </ng-template>
         </p-dialog>

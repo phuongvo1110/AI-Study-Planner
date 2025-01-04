@@ -17,7 +17,12 @@ import { AuthGuard } from "./helpers/auth.guard";
               canActivate: [AuthGuard]
             },
           ],
-        }
+        },
+        {
+          path: "authenticate",
+          loadChildren: () =>
+            import("./account/account.module").then((m) => m.AccountModule),
+        },
       ],
       {
         scrollPositionRestoration: "enabled",

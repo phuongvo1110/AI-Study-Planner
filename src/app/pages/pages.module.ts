@@ -23,6 +23,7 @@ import { PanelModule } from "primeng/panel";
 import { SharedModule } from "../shared/shared.module";
 import { ChartModule } from "primeng/chart";
 import { DividerModule } from "primeng/divider";
+import { TooltipModule } from "primeng/tooltip";
 
 @NgModule({
     imports: [
@@ -45,7 +46,8 @@ import { DividerModule } from "primeng/divider";
         PanelModule,
         SharedModule,
         ChartModule,
-        DividerModule
+        DividerModule,
+        TooltipModule
     ],
     declarations: [WorkspaceComponent, TasksComponent, AnalyticsComponent, ProfileComponent],
 })

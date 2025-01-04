@@ -1,7 +1,10 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
+import { MessageService } from "primeng/api";
 import { debounceTime, Subscription } from "rxjs";
 import { LayoutService } from "src/app/layout/service/app.layout.service";
+import { User } from "src/app/models";
 import { Task } from "src/app/models/task";
+import { AccountService } from "src/app/services/account.service";
 import { AnalyticsService } from "src/app/services/analytic.service";
 import { TaskService } from "src/app/services/tasks.service";
 
@@ -17,6 +20,13 @@ export class AnalyticsComponent implements OnDestroy, OnInit {
   tasks: Task[] = [];
   daysAccessed: number = 0;
   totalTimeFocused: number = 0;
+  createUserModal: boolean = false;
+  submittedUser: boolean = false;
+  userForm: any = {
+    email: '',
+    password: '',
+  }
+  user: User = null;
   analytics: any;
   totalTasksByStatus: { [key: string]: number } = {};
   messageAI: {
@@ -27,7 +37,9 @@ export class AnalyticsComponent implements OnDestroy, OnInit {
   constructor(
     private layoutService: LayoutService,
     private taskService: TaskService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private accountService: AccountService,
+    private messageService: MessageService
   ) {
     this.subscription = this.layoutService.configUpdate$
       .pipe(debounceTime(25))
@@ -37,6 +49,11 @@ export class AnalyticsComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
+    this.accountService.user.subscribe((user) => {
+      this.user = user;
+    })
+    this.user = this.accountService.userValue;
+    console.log(this.user);
     this.taskService.getTasks().subscribe({
       next: (response: any) => {
         this.tasks = response.data.data;
@@ -51,10 +68,51 @@ export class AnalyticsComponent implements OnDestroy, OnInit {
     });
     this.analyticsService.getAnalytics().subscribe({
       next: (response: any) => {
-        this.analytics = response.data;
-        console.log(this.analytics);
-        this.generateBarChartData();
+        console.log(response);
+        if (response.data) {
+          this.analytics = response.data;
+          console.log(this.analytics);
+          this.generateBarChartData();
+        }
       },
+    });
+  }
+  upgradeMember() {
+    this.createUserModal = true;
+  }
+  hideUserDialog() {
+    this.createUserModal = false;
+    this.submittedUser = false;
+  }
+  saveUser() {
+    this.submittedUser = true;
+    this.accountService.upgradeMember(this.userForm.email, this.userForm.password).pipe().subscribe({
+      next: (response: any) => {
+        console.log(response);
+        this.showSuccessMessage("User upgraded successfully");
+        this.hideUserDialog();
+        window.location.reload();
+      },
+      error: (error: any) => {
+        this.showErrorMessage(error.error.message);
+      },
+    })
+  }
+  private showSuccessMessage(detail: string) {
+    this.messageService.add({
+      severity: "success",
+      summary: "Success",
+      detail: detail,
+      life: 3000,
+    });
+  }
+
+  private showErrorMessage(detail: string) {
+    this.messageService.add({
+      severity: "error",
+      summary: "Error",
+      detail: detail,
+      life: 3000,
     });
   }
   calculateTasksByStatus() {
