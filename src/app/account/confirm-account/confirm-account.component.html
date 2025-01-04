@@ -1,0 +1,22 @@
+<div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen">
+    <div class="flex flex-column align-items-center justify-content-center">
+      <div
+        class="w-full surface-card py-6 px-4 sm:px-6 lg:px-8"
+        style="border-radius: 8px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1)"
+      >
+        <div class="text-center mb-5">
+          <span class="text-3xl font-bold">Email Verification</span>
+        </div>
+  
+        <div *ngIf="loading" class="text-center">
+          <p>Verifying your email...</p>
+          <p-progressSpinner></p-progressSpinner>
+        </div>
+  
+        <div *ngIf="!loading && verified" class="text-center">
+          <p class="text-green-500 font-bold">Your email has been verified successfully!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  

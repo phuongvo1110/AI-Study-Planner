@@ -14,9 +14,10 @@ import { MessagesModule } from "primeng/messages";
 import { ToastModule } from "primeng/toast";
 import { ChipModule } from "primeng/chip";
 import { GoogleCallbackComponent } from "./google-callback/google-callback.component";
+import { ConfirmAccountComponent } from "./confirm-account/confirm-account.component";
 
 @NgModule({
-  declarations: [LoginComponent, RegisterComponent, GoogleCallbackComponent],
+  declarations: [LoginComponent, RegisterComponent, GoogleCallbackComponent, ConfirmAccountComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

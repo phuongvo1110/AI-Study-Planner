@@ -15,6 +15,12 @@ export class RegisterComponent {
   loading = false;
   submitted = false;
   error?: string;
+  sendVerificationEmail: boolean = false;
+  resendVerificationEmailCheck: boolean = false;
+  userRegistered: any = null;
+  interval: any = null;
+  resendDuration: number = 60;
+  remainingDuration: number = this.resendDuration;
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -48,10 +54,27 @@ export class RegisterComponent {
       .register(formValue)
       .pipe(first())
       .subscribe({
-        next: () => {
-          this.router.navigate(["/authenticate/login"], {
-            queryParams: { registered: true },
-          });
+        next: (response: any) => {
+          console.log(response);
+          this.userRegistered = response.data;
+          if (this.userRegistered.access_token) {
+            this.accountService.sendVerificationEmail(this.userRegistered.access_token).subscribe({
+              next: (response: any) => {
+                this.remainingDuration = this.resendDuration;
+                this.interval = setInterval(() => {
+                  this.remainingDuration--;
+                  if (this.remainingDuration <= 0) {
+                    this.resendVerificationEmailCheck = true;
+                    clearInterval(this.interval);
+                    this.remainingDuration = this.resendDuration;
+                  }
+                })
+              }
+            })
+          }
+          // this.router.navigate(["/authenticate/login"], {
+          //   queryParams: { registered: true },
+          // });
         },
         error: (error) => {
           this.error = error;
@@ -64,5 +87,37 @@ export class RegisterComponent {
           });
         },
       });
+  }
+  resendVerificationEmail() {
+    this.loading = true;
+    this.resendVerificationEmailCheck = false;
+    this.accountService.sendVerificationEmail(this.userRegistered.access_token).subscribe({
+      next: (response: any) => {
+        this.remainingDuration = this.resendDuration;
+        this.interval = setInterval(() => {
+          this.remainingDuration--;
+          if (this.remainingDuration <= 0) {
+            this.resendVerificationEmailCheck = true;
+            clearInterval(this.interval);
+            this.remainingDuration = this.resendDuration;
+          }
+        })
+      },
+      error: (error) => {
+        this.error = error;
+        this.loading = false;
+        this.messageService.add({
+          key: "tst",
+          severity: "error",
+          summary: error.error.message,
+          detail: "Resend verification email failed",
+        });
+      },
+    });
+  }
+  formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   }
 }

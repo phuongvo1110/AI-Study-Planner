@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Injectable } from "@angular/core";
 import { BehaviorSubject, map, Observable, throwError } from "rxjs";
 import { User } from "../models";
 import { Router } from "@angular/router";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 
 @Injectable({ 
@@ -79,6 +79,19 @@ export class AccountService {
         return userValue;
       })
     );;
+  }
+  verifyEmail(token: string): Observable<any> {
+    debugger
+    return this.http.post(`${environment.apiUrl}/api/v1/users/verify-email`, {
+      token: token
+    });
+  }
+  sendVerificationEmail(accessToken: string): Observable<any> {
+    var header = {
+      headers: new HttpHeaders()
+        .set('Authorization',  `Bearer ${accessToken}`)
+    }
+    return this.http.post(`${environment.apiUrl}/api/v1/users/send-verification-email`,{}, header);
   }
   updatedUser(updatedUser: User) {
     localStorage.setItem("user", JSON.stringify(updatedUser));
