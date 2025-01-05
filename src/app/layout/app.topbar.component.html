@@ -52,28 +52,46 @@
 </p-menu>
 
 <p-dialog [(visible)]="createUserModal" [style]="{width: '450px'}" header="Upgrade to Member" [modal]="true"
-class="p-fluid">
-<ng-template pTemplate="content">
-    <span class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade to add more tasks and use AI</span>
-    <div class="field">
-        <label for="name">Email</label>
-        <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
-            [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
-        <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is required.</small>
-    </div>
-    <div class="field">
-        <label for="password">Password</label>
-        <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
-            styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
-        <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password is required.</small>
-    </div>
-</ng-template>
-
-<ng-template pTemplate="footer">
-    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
-        (click)="hideUserDialog()"></button>
-    <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text"
-        (click)="saveUser()"></button>
-</ng-template>
+    class="p-fluid">
+    <ng-template pTemplate="content">
+        @if (!userUpgraded) {
+        <span
+            class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade
+            to see statistics</span>
+        <div class="field">
+            <label for="name">Email</label>
+            <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
+                [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
+            <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is
+                required.</small>
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
+                styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+            <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password is
+                required.</small>
+        </div>
+        } @else {
+        <div class="flex flex-col gap-3 items-center justify-center">
+            <span class="text-2xl font-bold text-green-500">{{messageSendVerification}}</span>
+            @if (sendVerificationEmailCheck) {
+            <span class="text-lg font-bold">{{formatTime(remainingDuration)}}</span>
+            <p-button [disabled]="!resendVerificationEmailCheck" (onClick)="resendVerificationEmail()"
+                label="Resend Verification Email" icon="pi pi-envelope" styleClass="w-full mt-3 p-3"
+                severity="secondary"></p-button>
+            } @else {
+            <span class="text-lg font-bold text-red-500">{{messageError}}</span>
+            }
+        </div>
+        }
+    </ng-template>
+    <ng-template pTemplate="footer">
+        @if (!userUpgraded) {
+        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+            (click)="hideUserDialog()"></button>
+        <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
+        }
+    </ng-template>
 </p-dialog>
 <p-toast></p-toast>

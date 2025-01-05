@@ -81,7 +81,7 @@ export class AccountService {
     );;
   }
   verifyEmail(token: string): Observable<any> {
-    debugger
+    
     return this.http.post(`${environment.apiUrl}/api/v1/users/verify-email`, {
       token: token
     });
@@ -92,6 +92,17 @@ export class AccountService {
         .set('Authorization',  `Bearer ${accessToken}`)
     }
     return this.http.post(`${environment.apiUrl}/api/v1/users/send-verification-email`,{}, header);
+  }
+  sendChangePassword(email: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/api/v1/users/send-change-password-email`, {
+      email: email
+    });
+  }
+  emailChangePassword(password: string, token) {
+    return this.http.post(`${environment.apiUrl}/api/v1/users/change-password-from-email`, {
+      new_password: password,
+      token: token
+    });
   }
   updatedUser(updatedUser: User) {
     localStorage.setItem("user", JSON.stringify(updatedUser));

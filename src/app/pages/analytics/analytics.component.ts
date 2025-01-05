@@ -22,6 +22,16 @@ export class AnalyticsComponent implements OnDestroy, OnInit {
   totalTimeFocused: number = 0;
   createUserModal: boolean = false;
   submittedUser: boolean = false;
+  loading = false;
+  error?: string;
+  userUpgraded: boolean = false;
+  sendVerificationEmailCheck: boolean = false;
+  resendVerificationEmailCheck: boolean = false;
+  resendDuration: number = 60;
+  messageSendVerification: string;
+  remainingDuration: number = this.resendDuration;
+  messageError: string;
+  interval:any = null;
   userForm: any = {
     email: '',
     password: '',
@@ -90,13 +100,68 @@ export class AnalyticsComponent implements OnDestroy, OnInit {
       next: (response: any) => {
         console.log(response);
         this.showSuccessMessage("User upgraded successfully");
-        this.hideUserDialog();
-        window.location.reload();
+        console.log(this.user);
+        this.userUpgraded = true;
+        if (this.user.access_token) {
+          this.accountService.sendVerificationEmail(this.user.access_token).subscribe({
+            next: (response: any) => {
+              this.showSuccessMessage("Please confirm verification in your email");
+              this.sendVerificationEmailCheck = true;
+              this.remainingDuration = this.resendDuration;
+              this.messageSendVerification = 'Send Email Verification Successfully';
+              this.interval = setInterval(() => {
+                this.remainingDuration--;
+                if (this.remainingDuration <= 0) {
+                  this.resendVerificationEmailCheck = true;
+                  clearInterval(this.interval);
+                  this.remainingDuration = this.resendDuration;
+                }
+              }, 1000)
+            },
+            error: (error: any) => {
+              this.messageSendVerification = 'Send Email Verification Failed';
+              this.messageError = error.error.message;
+              this.sendVerificationEmailCheck = false;
+            }
+          })
+        }
       },
       error: (error: any) => {
         this.showErrorMessage(error.error.message);
       },
     })
+  }
+  resendVerificationEmail() {
+    this.loading = true;
+    this.resendVerificationEmailCheck = false;
+    this.accountService.sendVerificationEmail(this.user.access_token).subscribe({
+      next: (response: any) => {
+        this.remainingDuration = this.resendDuration;
+        this.interval = setInterval(() => {
+          this.remainingDuration--;
+          if (this.remainingDuration <= 0) {
+            this.resendVerificationEmailCheck = true;
+            clearInterval(this.interval);
+            this.remainingDuration = this.resendDuration;
+          }
+        }, 1000)
+      },
+      error: (error) => {
+        this.error = error;
+        this.loading = false;
+        this.messageService.add({
+          key: "tst",
+          severity: "error",
+          summary: error.error.message,
+          detail: "Resend verification email failed",
+        });
+      },
+    });
+  }
+  formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   }
   private showSuccessMessage(detail: string) {
     this.messageService.add({

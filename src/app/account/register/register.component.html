@@ -52,15 +52,20 @@
                                 class="font-medium no-underline ml-2 text-right cursor-pointer">Having an account?
                                 Sign in now</a>
                         </div>
-                        <button pButton pRipple label="Sign Up" class="w-full p-3 text-xl" type="submit"></button>
+                        <p-button [loading]="loading" loadingIcon="" styleClass="w-full float-right" label="Sign Up" type="submit">
+                        </p-button>
                     </div>
                 </form>
                 } @else {
                 <div class="flex flex-col gap-3 items-center justify-center">
-                    <span class="text-2xl font-bold text-green-500">Send Email Verification Successfully</span>
-                    <span class="text-lg font-bold">{{formatTime(remainingDuration)}}</span>
-                    <p-button [disabled]="!resendVerificationEmailCheck" (onClick)="resendVerificationEmail()" label="Resend Verification Email"
-                        icon="pi pi-envelope" styleClass="w-full mt-3 p-3" severity="secondary"></p-button>
+                    <span class="text-2xl font-bold text-green-500">{{messageSendVerification}}</span>
+                    @if (sendVerificationEmailCheck) {
+                        <span class="text-lg font-bold">{{formatTime(remainingDuration)}}</span>
+                        <p-button [disabled]="!resendVerificationEmailCheck" (onClick)="resendVerificationEmail()" label="Resend Verification Email"
+                            icon="pi pi-envelope" styleClass="w-full mt-3 p-3" severity="secondary"></p-button>
+                    } @else {
+                        <span class="text-lg font-bold text-red-500">{{messageError}}</span>
+                    }
                 </div>
                 }
             </div>

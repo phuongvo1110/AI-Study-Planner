@@ -15,9 +15,11 @@ import { ToastModule } from "primeng/toast";
 import { ChipModule } from "primeng/chip";
 import { GoogleCallbackComponent } from "./google-callback/google-callback.component";
 import { ConfirmAccountComponent } from "./confirm-account/confirm-account.component";
+import { ForgotPasswordComponent } from "./forgot-password/forgot-password.component";
+import { NewPasswordComponent } from "./new-password/new-password.component";
 
 @NgModule({
-  declarations: [LoginComponent, RegisterComponent, GoogleCallbackComponent, ConfirmAccountComponent],
+  declarations: [LoginComponent, RegisterComponent, GoogleCallbackComponent, ConfirmAccountComponent, ForgotPasswordComponent, NewPasswordComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,

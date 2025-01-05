@@ -32,13 +32,13 @@
                             <p-chip (click)="onGoogleSignin()" label="Google" icon="pi pi-google" styleClass="m-1"></p-chip>
                         </div>
                         <div class="flex align-items-center justify-content-between mb-5 gap-5">
-                            <a class="font-medium no-underline ml-2 text-right cursor-pointer"
+                            <a [routerLink]="['/authenticate/forgot-password']" class="font-medium no-underline ml-2 text-right cursor-pointer"
                                 style="color: var(--primary-color)">Forgot password?</a>
                             <a [routerLink]="['/authenticate/register']"
                                 class="font-medium no-underline ml-2 text-right cursor-pointer">Doesn't have an account?
                                 Sign up now</a>
                         </div>
-                        <button pButton pRipple label="Sign In" class="w-full p-3 text-xl" type="submit"></button>
+                        <p-button [loading]="loading" label="Sign In" styleClass="w-full " type="submit"></p-button>
                         <p-button (onClick)="signInAsGuest()" label="Sign in as Guest" icon="pi pi-user" styleClass="w-full mt-3 p-3" severity="secondary"></p-button>
                     </div>
                 </form>

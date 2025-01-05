@@ -16,14 +16,17 @@ export class ConfirmAccountComponent implements OnInit {
 
   }
   ngOnInit(): void {
-    const token = this.route.snapshot.queryParams['token'];
+    let token = this.route.snapshot.queryParams['token'];
     if (token) {
+      token = token.replace(/ /g, '+');
       this.verifyEmail(token);
+    } else {
+      console.error('No token found in query parameters');
     }
   }
   verifyEmail(token: string){
     this.loading = true;
-    debugger
+    
     this.accountService.verifyEmail(token).subscribe({
       next: (response: any) => {
         this.loading = false;

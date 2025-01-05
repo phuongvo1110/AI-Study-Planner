@@ -4,6 +4,8 @@ import { RegisterComponent } from "./register/register.component";
 import { GoogleCallbackComponent } from "./google-callback/google-callback.component";
 import { ProfileComponent } from "../pages/profile/profile.component";
 import { ConfirmAccountComponent } from "./confirm-account/confirm-account.component";
+import { ForgotPasswordComponent } from "./forgot-password/forgot-password.component";
+import { NewPasswordComponent } from "./new-password/new-password.component";
 
 export const accountRoutes: Routes = [
   {
@@ -19,5 +21,11 @@ export const accountRoutes: Routes = [
   },
   {
     path: 'confirm-account', component: ConfirmAccountComponent
+  },
+  {
+    path: 'forgot-password', component: ForgotPasswordComponent
+  },
+  {
+    path: 'change-password', component: NewPasswordComponent
   }
 ];

@@ -15,12 +15,14 @@ export class RegisterComponent {
   loading = false;
   submitted = false;
   error?: string;
-  sendVerificationEmail: boolean = false;
+  sendVerificationEmailCheck: boolean = false;
   resendVerificationEmailCheck: boolean = false;
   userRegistered: any = null;
   interval: any = null;
   resendDuration: number = 60;
+  messageSendVerification: string;
   remainingDuration: number = this.resendDuration;
+  messageError: string;
   constructor(
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
@@ -50,17 +52,22 @@ export class RegisterComponent {
       password: this.form.controls["password"].value,
       confirm_password: this.form.controls["confirmPassword"].value,
     };
+    debugger
     this.accountService
       .register(formValue)
       .pipe(first())
       .subscribe({
         next: (response: any) => {
+          debugger
           console.log(response);
           this.userRegistered = response.data;
+          this.loading = false;
           if (this.userRegistered.access_token) {
             this.accountService.sendVerificationEmail(this.userRegistered.access_token).subscribe({
               next: (response: any) => {
+                this.sendVerificationEmailCheck = true;
                 this.remainingDuration = this.resendDuration;
+                this.messageSendVerification = 'Send Email Verification Successfully';
                 this.interval = setInterval(() => {
                   this.remainingDuration--;
                   if (this.remainingDuration <= 0) {
@@ -68,7 +75,12 @@ export class RegisterComponent {
                     clearInterval(this.interval);
                     this.remainingDuration = this.resendDuration;
                   }
-                })
+                }, 1000)
+              },
+              error: (error: any) => {
+                this.messageSendVerification = 'Send Email Verification Failed';
+                this.messageError = error.error.message;
+                this.sendVerificationEmailCheck = false;
               }
             })
           }
@@ -101,7 +113,7 @@ export class RegisterComponent {
             clearInterval(this.interval);
             this.remainingDuration = this.resendDuration;
           }
-        })
+        }, 1000)
       },
       error: (error) => {
         this.error = error;
