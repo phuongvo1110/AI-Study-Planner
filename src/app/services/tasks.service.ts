@@ -15,7 +15,12 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   // Fetch all tasks
-  getTasks(status?: number, priority?: number, page?: number, limit?: number): Observable<any[]> {
+  getTasks(
+    status?: number,
+    priority?: number,
+    page?: number,
+    limit?: number
+  ): Observable<any[]> {
     const params: any = {};
     if (status !== undefined) params.status = status;
     if (priority !== undefined) params.priority = priority;
@@ -24,7 +29,9 @@ export class TaskService {
 
     const queryString = new URLSearchParams(params).toString();
 
-    const url = queryString ? `${environment.apiUrl}${this.baseUrl}?${queryString}` : `${environment.apiUrl}${this.baseUrl}`;
+    const url = queryString
+      ? `${environment.apiUrl}${this.baseUrl}?${queryString}`
+      : `${environment.apiUrl}${this.baseUrl}`;
     return this.http.get<any[]>(url);
   }
 
@@ -91,33 +98,21 @@ export class TaskService {
     return this.http.delete<void>(`${environment.apiUrl}${this.baseUrl}/${id}`);
   }
   expireTask(id: string): Observable<Task> {
-    return this.http.patch<Task>(`${environment.apiUrl}${this.baseUrl}/${id}/expire`, {});
-  }
-  updateTotalTimeSpend(id: string, timeSpend: number) : Observable<Task> {
-    return this.http.patch<Task>(`${environment.apiUrl}${this.baseUrl}/${id}/total-spend-time`, {
-      total_spend_time: timeSpend
-    })
-  }
-  analyzeAI(tasks: Task[]): Observable<any> {
-    const taskStrings = tasks.map((task) => 
-      JSON.stringify({
-        name: task.name,
-        description: task.description,
-        priority: task.priority,
-        status: task.status,
-        start_date: task.start_date,
-        end_date: task.end_date,
-      })
+    return this.http.patch<Task>(
+      `${environment.apiUrl}${this.baseUrl}/${id}/expire`,
+      {}
     );
-    taskStrings.unshift('Read the Task Data and Provide feedback on potential adjustments: Warning about overly tight schedules that may lead to burnout. Recommending prioritization changes for improved focus and balance. (For each line of feedback put them in a seperated list and a heading title <h1 class="mt-3 text-3xl !font-extrabold tracking-tight text-primary-500"></h1> and HTML for example in <ol class="font-bold text-lg"></ol> and <li></li>. Give no JSON value inside. For any priority from 1 to 3 transfer them to Low, Medium and High respectively and status from 1 to 4 transfer them to Not Started, In Progress, Completed or Expired)');
-    const requestData = {
-      date: moment().format("DD-MM-YYYY"),
-      tasks: taskStrings,
-    };
-    return this.http.post<any>(
-      `${environment.apiUrl}/api/v1/ai/analyze`,
-      JSON.stringify(requestData)
+  }
+  updateTotalTimeSpend(id: string, timeSpend: number): Observable<Task> {
+    return this.http.patch<Task>(
+      `${environment.apiUrl}${this.baseUrl}/${id}/total-spend-time`,
+      {
+        total_spend_time: timeSpend,
+      }
     );
+  }
+  analyzeAI(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/api/v1/ai/suggest`);
   }
   private mapStatus(status: any): number {
     switch (status.toLowerCase()) {

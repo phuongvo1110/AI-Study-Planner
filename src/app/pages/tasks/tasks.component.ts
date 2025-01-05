@@ -44,7 +44,7 @@ export class TasksComponent implements OnInit {
   messageError: string;
   interval:any = null;
   pageOffset: number;
-  analyzeMessage!: string;
+  analyzeMessage: any;
   newTask: boolean = false;
   createUserModal: boolean = false;
   tasksStatus: TaskStatus[] = [
@@ -145,9 +145,10 @@ export class TasksComponent implements OnInit {
   }
   analyzeSchedule() {
     if (this.user.role && this.user.role === 'CUSTOMER') {
-      this.taskService.analyzeAI(this.tasks).subscribe({
+      this.taskService.analyzeAI().subscribe({
         next: (response: any) => {
-          this.analyzeMessage = response.data.message;
+          this.analyzeMessage = response.data;
+          console.log(this.analyzeMessage);
         },
       });
     } else {

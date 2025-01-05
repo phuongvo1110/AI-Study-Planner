@@ -5,8 +5,8 @@
             <div class="flex flex-col flex-wrap justify-content-center">
                 <div class="w-full flex gap-3 mb-3">
                     <p-button (onClick)="openNew()" styleClass="w-[150px]" label="Add new" icon="pi pi-plus"></p-button>
-                    <button styleClass="w-[150px]" pButton class="p-button-info" [disabled]="!tasks" label="Analyze with AI"
-                        icon="pi pi-desktop" (click)="analyzeSchedule()"></button>
+                    <button styleClass="w-[150px]" pButton class="p-button-info" [disabled]="!tasks"
+                        label="Analyze with AI" icon="pi pi-desktop" (click)="analyzeSchedule()"></button>
                     <p-dropdown styleClass="w-[200px]" [(ngModel)]="statusInput" inputId="taskStatus"
                         optionValue="label" [options]="tasksStatus" placeholder="All Status">
                         <ng-template pTemplate="selectedItem">
@@ -35,7 +35,21 @@
                         (click)="filterTasks()"></button>
                 </div>
             </div>
-            <span class="mb-3 mt-3 font-bold" *ngIf="analyzeMessage !== ''" [innerHTML]="analyzeMessage"></span>
+            <span class="mb-3 mt-3 font-bold" *ngIf="analyzeMessage">
+                <h4 class="mt-3 text-3xl !font-extrabold tracking-tight text--black">{{analyzeMessage.heading}}</h4>
+                <h5 class="mt-3 text-2xl !font-extrabold tracking-tight text-primary-500">Warning</h5>
+                <ul class="font-bold text-lg">
+                    @for (message of analyzeMessage.warning; track $index) {
+                    <li>{{ message }}</li>
+                    }
+                </ul>
+                <h5 class="mt-3 text-2xl !font-extrabold tracking-tight text-primary-500">Feedback</h5>
+                <ul class="font-bold text-lg">
+                    @for (message of analyzeMessage.feedback; track $index) {
+                    <li>{{ message }}</li>
+                    }
+                </ul>
+            </span>
             <p-table #dt1 [value]="filteredTasks" [rows]="rowsPerPage" [responsiveLayout]="'scroll'"
                 [sortMode]="'multiple'"
                 [globalFilterFields]="['name', 'description', 'priority.value', 'status.value', 'start_date', 'end_date']">
@@ -160,47 +174,49 @@
             </ng-template>
         </p-dialog>
         <p-dialog [(visible)]="createUserModal" [style]="{width: '450px'}" header="Upgrade to Member" [modal]="true"
-    class="p-fluid">
-    <ng-template pTemplate="content">
-        @if (!userUpgraded) {
-        <span
-            class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade
-            to see statistics</span>
-        <div class="field">
-            <label for="name">Email</label>
-            <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
-                [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
-            <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is
-                required.</small>
-        </div>
-        <div class="field">
-            <label for="password">Password</label>
-            <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
-                styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
-            <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password is
-                required.</small>
-        </div>
-        } @else {
-        <div class="flex flex-col gap-3 items-center justify-center">
-            <span class="text-2xl font-bold text-green-500">{{messageSendVerification}}</span>
-            @if (sendVerificationEmailCheck) {
-            <span class="text-lg font-bold">{{formatTime(remainingDuration)}}</span>
-            <p-button [disabled]="!resendVerificationEmailCheck" (onClick)="resendVerificationEmail()"
-                label="Resend Verification Email" icon="pi pi-envelope" styleClass="w-full mt-3 p-3"
-                severity="secondary"></p-button>
-            } @else {
-            <span class="text-lg font-bold text-red-500">{{messageError}}</span>
-            }
-        </div>
-        }
-    </ng-template>
-    <ng-template pTemplate="footer">
-        @if (!userUpgraded) {
-        <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
-            (click)="hideUserDialog()"></button>
-        <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
-        }
-    </ng-template>
-</p-dialog>
+            class="p-fluid">
+            <ng-template pTemplate="content">
+                @if (!userUpgraded) {
+                <span
+                    class="text-xl font-bold text-blue-600 p-4 border-2 border-blue-600 text-center rounded-xl mb-3 block">Upgrade
+                    to see add more tasks and use AI</span>
+                <div class="field">
+                    <label for="name">Email</label>
+                    <input type="email" pInputText id="email" [(ngModel)]="userForm.email" required autofocus
+                        [ngClass]="{'ng-invalid ng-dirty' : submittedUser && !userForm.email}" />
+                    <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.email">Email is
+                        required.</small>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <p-password id="password" [(ngModel)]="userForm.password" placeholder="Password" [toggleMask]="true"
+                        styleClass="mb-5" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+                    <small class="ng-dirty ng-invalid text-red-500" *ngIf="submittedUser && !userForm.password">Password
+                        is
+                        required.</small>
+                </div>
+                } @else {
+                <div class="flex flex-col gap-3 items-center justify-center">
+                    <span class="text-2xl font-bold text-green-500">{{messageSendVerification}}</span>
+                    @if (sendVerificationEmailCheck) {
+                    <span class="text-lg font-bold">{{formatTime(remainingDuration)}}</span>
+                    <p-button [disabled]="!resendVerificationEmailCheck" (onClick)="resendVerificationEmail()"
+                        label="Resend Verification Email" icon="pi pi-envelope" styleClass="w-full mt-3 p-3"
+                        severity="secondary"></p-button>
+                    } @else {
+                    <span class="text-lg font-bold text-red-500">{{messageError}}</span>
+                    }
+                </div>
+                }
+            </ng-template>
+            <ng-template pTemplate="footer">
+                @if (!userUpgraded) {
+                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+                    (click)="hideUserDialog()"></button>
+                <button pButton pRipple label="Upgrade" icon="pi pi-check" class="p-button-text"
+                    (click)="saveUser()"></button>
+                }
+            </ng-template>
+        </p-dialog>
     </div>
 </div>
